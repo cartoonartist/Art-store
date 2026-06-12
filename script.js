@@ -172,17 +172,32 @@ function commissionOrder() {
 // ===========================
 
 const submitBtn =
-document.querySelector(
-".popup-content button"
-);
+document.getElementById("submitPayment");
 
-submitBtn.addEventListener(
-"click",
-function(){
+submitBtn.addEventListener("click", function(){
+
+    const screenshot =
+    document.getElementById(
+    "paymentScreenshot"
+    );
+
+    if(screenshot.files.length === 0){
+
+        alert(
+        "Please upload payment screenshot first."
+        );
+
+        return;
+    }
 
     alert(
-      "Payment proof submitted successfully!"
+    "Payment proof submitted successfully!"
     );
+
+    document
+    .getElementById("paymentPopup")
+    .style.display = "none";
+});
 
     document
     .getElementById("paymentPopup")
