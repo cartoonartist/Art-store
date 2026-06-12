@@ -15,133 +15,39 @@ body{
     overflow-x:hidden;
     position:relative;
 }
-/* ==========================
-   GALAXY CLUSTER BACKGROUND
-========================== */
-
 #galaxy{
     position:fixed;
     top:0;
     left:0;
     width:100%;
     height:100%;
-    overflow:hidden;
     z-index:-10;
-    background:
-    radial-gradient(circle at center,
-    #091024 0%,
-    #030712 40%,
-    #000 100%);
+
+    background-image:url("images/galaxy.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    transition:transform 1s ease;
 }
 
-/* Nebulas */
-
-.nebula{
+#galaxy::after{
+    content:"";
     position:absolute;
-    border-radius:50%;
-    filter:blur(80px);
-    opacity:.5;
-    animation:floatNebula 15s infinite ease-in-out;
+    inset:0;
+    background:rgba(0,0,0,0.35);
 }
+#galaxy::after{
+    content:"";
 
-.nebula1{
-    width:400px;
-    height:400px;
-    background:#3f51ff;
-    top:10%;
-    left:5%;
-}
-
-.nebula2{
-    width:500px;
-    height:500px;
-    background:#8b2cff;
-    top:40%;
-    right:5%;
-}
-
-.nebula3{
-    width:350px;
-    height:350px;
-    background:#00d4ff;
-    bottom:10%;
-    left:40%;
-}
-
-/* Galaxy Core */
-
-.galaxy-center{
     position:absolute;
-    top:50%;
-    left:50%;
-    width:300px;
-    height:300px;
-    transform:translate(-50%,-50%);
-    border-radius:50%;
+    inset:0;
 
     background:
-    radial-gradient(circle,
-    rgba(255,255,255,.9),
-    rgba(0,212,255,.3),
-    transparent);
+    rgba(0,0,0,0.35);
 
-    filter:blur(20px);
-
-    animation:
-    pulseGalaxy 6s infinite ease-in-out;
-}
-
-/* Star Layer */
-
-.starfield{
-    position:absolute;
-    width:100%;
-    height:100%;
-
-    background-image:
-    radial-gradient(white 1px, transparent 1px);
-
-    background-size:50px 50px;
-
-    animation:
-    starMove 120s linear infinite;
-}
-
-@keyframes starMove{
-
-    from{
-        transform:translateY(0);
-    }
-
-    to{
-        transform:translateY(-1000px);
-    }
-}
-
-@keyframes pulseGalaxy{
-
-    0%,100%{
-        transform:
-        translate(-50%,-50%)
-        scale(1);
-    }
-
-    50%{
-        transform:
-        translate(-50%,-50%)
-        scale(1.15);
-    }
-}
-
-@keyframes floatNebula{
-
-    0%,100%{
-        transform:translate(0,0);
-    }
-
-    50%{
-        transform:translate(50px,-50px);
-    }
+    backdrop-filter:
+    blur(2px);
 }
 
 
