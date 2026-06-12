@@ -28,9 +28,19 @@ body{
     background-position:center;
     background-repeat:no-repeat;
 
-    transition:transform 1s ease;
+    animation:galaxyFloat 20s ease-in-out infinite;
 }
 
+@keyframes galaxyFloat{
+
+    0%,100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.08);
+    }
+}
 #galaxy::after{
     content:"";
     position:absolute;
