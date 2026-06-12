@@ -200,25 +200,7 @@ document.getElementById(
 );
 
 let rotation = 0;
-const galaxy =
-document.getElementById("galaxy");
 
-let galaxyRotation = 0;
-
-function rotateGalaxy(clockwise){
-
-    if(clockwise){
-
-        galaxyRotation += 20;
-
-    }else{
-
-        galaxyRotation -= 20;
-    }
-
-    galaxy.style.transform =
-    `rotate(${galaxyRotation}deg)`;
-}
 
 // ===========================
 // TOUCH SWIPE
