@@ -150,12 +150,12 @@
                         Wishlist
                     </button>
 
-                    <button onclick="addCart('Artwork #1',250)">
-                        Add To Cart
+                    <button onclick="addCart('Artwork #1', getDrawingPrice('frame1'))">
+                      Add To Cart
                     </button>
 
-                    <button onclick="buyNow('Artwork #1',250)">
-                        Buy Now
+                    <button onclick="buyNow('Artwork #1', getDrawingPrice('frame1'))">
+                      Buy Now
                     </button>
 
                 </div>
@@ -207,12 +207,12 @@
                         Wishlist
                     </button>
 
-                    <button onclick="addCart('Artwork #2',250)">
-                        Add To Cart
+                    <button onclick="addCart('Artwork #2', getDrawingPrice('frame2'))">
+                      Add To Cart
                     </button>
 
-                    <button onclick="buyNow('Artwork #2',250)">
-                        Buy Now
+                    <button onclick="buyNow('Artwork #2', getDrawingPrice('frame2'))">
+                      Buy Now
                     </button>
 
                 </div>
@@ -338,30 +338,34 @@
 
     <!-- PAYMENT POPUP -->
 
-    <div id="paymentPopup"
-         class="popup">
+    <div id="paymentPopup" class="popup">
 
-        <div class="popup-content">
+    <div class="popup-content">
 
-            <span id="closePopup">
-                ×
-            </span>
+        <span id="closePopup">×</span>
 
-            <h2>
-                Scan QR & Pay
-            </h2>
+        <h2>Scan QR & Pay</h2>
 
-            <img src="images/QR.jpg"
-                 alt="QR Code"
-                 class="qr">
+        <p id="selectedProduct"></p>
 
-            <input type="file">
+        <p id="selectedPrice"></p>
 
-            <button>
-                Submit Payment Proof
-            </button>
+        <img
+            src="images/QR.jpg"
+            alt="QR Code"
+            class="qr"
+        >
 
-        </div>
+        <input
+            type="file"
+            accept="image/*"
+        >
+
+        <button id="submitPayment">
+            Submit Payment Proof
+        </button>
+
+    </div>
 
     </div>
 
