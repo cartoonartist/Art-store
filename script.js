@@ -142,7 +142,7 @@ function renderDrawings() {
             <div class="buttons">
                 <button onclick="addWishlist('${drawing.name}')">❤️ Wishlist</button>
                 <button onclick="addCart('${drawing.name}', ${discountedPrice})">🛒 Cart</button>
-                <button onclick="buyNow('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})">💳 Buy Now</button>
+                <button onclick="showDeliveryForm('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})">💳 Buy Now</button>
             </div>
         </div>`;
     }).join('');
@@ -235,7 +235,7 @@ function renderKeychains() {
             <div class="buttons">
                 <button onclick="addWishlist('${keychain.name}')">❤️ Wishlist</button>
                 <button onclick="addCart('${keychain.name}', ${discountedPrice})">🛒 Cart</button>
-                <button onclick="buyNow('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})">💳 Buy Now</button>
+                <button onclick="showDeliveryForm('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})">💳 Buy Now</button>
             </div>
         </div>`;
     }).join('');
@@ -289,44 +289,120 @@ function addCart(product, price) {
 }
 
 // ===========================
-// BUY NOW - GLOBAL VARIABLES
+// DELIVERY FORM POPUP
 // ===========================
-let currentOrderType = null;
-let currentOrderId = null;
-let currentOrderPrice = null;
-let currentOrderName = null;
-let currentCustomerEmail = null;
-let currentReferenceImage = null;
-
-function buyNow(product, price, type, id) {
+function showDeliveryForm(product, price, type, id) {
     currentOrderName = product;
     currentOrderPrice = price;
     currentOrderType = type;
     currentOrderId = id;
     
-    const popup = document.getElementById("paymentPopup");
-    if(popup) {
-        popup.style.display = "block";
+    // Show delivery form popup first
+    const deliveryPopup = document.getElementById("deliveryPopup");
+    if(deliveryPopup) {
+        deliveryPopup.style.display = "block";
+        // Clear previous values
+        document.getElementById("deliveryName").value = "";
+        document.getElementById("deliveryEmail").value = "";
+        document.getElementById("deliveryCity").value = "";
+        document.getElementById("deliveryPincode").value = "";
+        document.getElementById("deliveryAddress").value = "";
+        document.getElementById("deliveryState").value = "";
+        document.getElementById("deliveryPhone").value = "";
+    }
+}
+
+function submitDeliveryDetails() {
+    // Get delivery form values
+    const fullName = document.getElementById("deliveryName")?.value.trim() || "";
+    const email = document.getElementById("deliveryEmail")?.value.trim() || "";
+    const city = document.getElementById("deliveryCity")?.value.trim() || "";
+    const pincode = document.getElementById("deliveryPincode")?.value.trim() || "";
+    const address = document.getElementById("deliveryAddress")?.value.trim() || "";
+    const state = document.getElementById("deliveryState")?.value.trim() || "";
+    const phone = document.getElementById("deliveryPhone")?.value.trim() || "";
+    
+    // Validate all fields
+    if(!fullName) {
+        alert("❌ Please enter your full name.");
+        return;
+    }
+    if(!email) {
+        alert("❌ Please enter your email address.");
+        return;
+    }
+    if(!city) {
+        alert("❌ Please enter your city.");
+        return;
+    }
+    if(!pincode) {
+        alert("❌ Please enter your pincode.");
+        return;
+    }
+    if(!address) {
+        alert("❌ Please enter your complete address.");
+        return;
+    }
+    if(!state) {
+        alert("❌ Please enter your state.");
+        return;
+    }
+    if(!phone) {
+        alert("❌ Please enter your phone number.");
+        return;
+    }
+    if(phone.length < 10) {
+        alert("❌ Please enter a valid 10-digit phone number.");
+        return;
+    }
+    if(pincode.length !== 6) {
+        alert("❌ Please enter a valid 6-digit pincode.");
+        return;
+    }
+    
+    // Store delivery details
+    currentCustomerEmail = email;
+    window.deliveryDetails = {
+        fullName, email, city, pincode, address, state, phone
+    };
+    
+    // Close delivery popup
+    document.getElementById("deliveryPopup").style.display = "none";
+    
+    // Show payment popup
+    const paymentPopup = document.getElementById("paymentPopup");
+    if(paymentPopup) {
+        paymentPopup.style.display = "block";
         const fileInput = document.getElementById("paymentScreenshot");
         if(fileInput) fileInput.value = "";
-    } else {
-        alert("Payment system error. Please contact support.");
     }
 }
 
 // ===========================
-// CLOSE POPUP
+// CLOSE DELIVERY POPUP
 // ===========================
-const closeBtn = document.getElementById("closePopup");
-if(closeBtn) {
-    closeBtn.addEventListener("click", () => {
+const closeDeliveryBtn = document.getElementById("closeDeliveryPopup");
+if(closeDeliveryBtn) {
+    closeDeliveryBtn.addEventListener("click", () => {
+        document.getElementById("deliveryPopup").style.display = "none";
+    });
+}
+
+// ===========================
+// CLOSE PAYMENT POPUP
+// ===========================
+const closePopupBtn = document.getElementById("closePopup");
+if(closePopupBtn) {
+    closePopupBtn.addEventListener("click", () => {
         document.getElementById("paymentPopup").style.display = "none";
     });
 }
 
 window.addEventListener("click", (e) => {
-    const popup = document.getElementById("paymentPopup");
-    if(e.target === popup) popup.style.display = "none";
+    const deliveryPopup = document.getElementById("deliveryPopup");
+    const paymentPopup = document.getElementById("paymentPopup");
+    if(e.target === deliveryPopup) deliveryPopup.style.display = "none";
+    if(e.target === paymentPopup) paymentPopup.style.display = "none";
 });
 
 // ===========================
@@ -454,11 +530,11 @@ async function commissionOrder() {
 }
 
 // ===========================
-// SUBMIT PAYMENT (with commission image)
+// SUBMIT PAYMENT (with delivery details for products)
 // ===========================
-const submitBtn = document.getElementById("submitPayment");
-if(submitBtn) {
-    submitBtn.addEventListener("click", async function() {
+const submitPaymentBtn = document.getElementById("submitPayment");
+if(submitPaymentBtn) {
+    submitPaymentBtn.addEventListener("click", async function() {
         const screenshot = document.getElementById("paymentScreenshot");
         
         if(!screenshot || screenshot.files.length === 0) {
@@ -472,16 +548,18 @@ if(submitBtn) {
         if(currentOrderType === "commission") {
             emailSubject = `🎨 NEW COMMISSION ORDER - ${currentOrderName}`;
             emailMessage = `
-╔═══════════════════════════════════════╗
-║        NEW COMMISSION ORDER           ║
-╠═══════════════════════════════════════╣
+╔═══════════════════════════════════════════════════════╗
+║                 NEW COMMISSION ORDER                  ║
+╠═══════════════════════════════════════════════════════╣
 ║ Order ID: ${currentOrderId}
 ║ Order Date: ${new Date().toLocaleString()}
 ║
 ║ 👤 CUSTOMER DETAILS:
-║ Name: ${window.commissionDetails?.fullName || "N/A"}
+║ Full Name: ${window.commissionDetails?.fullName || "N/A"}
 ║ Email: ${window.commissionDetails?.email || "N/A"}
 ║ Phone: ${window.commissionDetails?.phone || "N/A"}
+║
+║ 📍 DELIVERY ADDRESS:
 ║ Address: ${window.commissionDetails?.address || "N/A"}
 ║ City: ${window.commissionDetails?.city || "N/A"}
 ║ Pincode: ${window.commissionDetails?.pincode || "N/A"}
@@ -495,12 +573,12 @@ if(submitBtn) {
 ║ (Image attached separately as base64)
 ║
 ║ 💰 PRICE DETAILS:
-║ Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
-║ Monthly Offer Applied: ${window.commissionDetails?.isMonthlyOffer ? "YES (10%)" : "NO"}
 ║ Total Price: ₹${currentOrderPrice}
+║ Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
+║ Monthly Offer: ${window.commissionDetails?.isMonthlyOffer ? "YES (10%)" : "NO"}
 ║
-║ 📎 Payment screenshot attached separately.
-╚═══════════════════════════════════════╝
+║ 📎 Payment screenshot attached below.
+╚═══════════════════════════════════════════════════════╝
             `;
             markCommissionBuyer(window.commissionDetails?.email);
         } else {
@@ -508,11 +586,22 @@ if(submitBtn) {
             const discountPercent = Math.floor(discount * 100);
             emailSubject = `🛍️ NEW ORDER - ${currentOrderName}`;
             emailMessage = `
-╔═══════════════════════════════════════╗
-║           NEW PRODUCT ORDER           ║
-╠═══════════════════════════════════════╣
+╔═══════════════════════════════════════════════════════╗
+║                  NEW PRODUCT ORDER                    ║
+╠═══════════════════════════════════════════════════════╣
 ║ Order ID: ${currentOrderId}
 ║ Order Date: ${new Date().toLocaleString()}
+║
+║ 👤 CUSTOMER DETAILS:
+║ Full Name: ${window.deliveryDetails?.fullName || "N/A"}
+║ Email: ${window.deliveryDetails?.email || "N/A"}
+║ Phone: ${window.deliveryDetails?.phone || "N/A"}
+║
+║ 📍 DELIVERY ADDRESS:
+║ Address: ${window.deliveryDetails?.address || "N/A"}
+║ City: ${window.deliveryDetails?.city || "N/A"}
+║ State: ${window.deliveryDetails?.state || "N/A"}
+║ Pincode: ${window.deliveryDetails?.pincode || "N/A"}
 ║
 ║ 📦 PRODUCT DETAILS:
 ║ Type: ${currentOrderType?.toUpperCase() || "PRODUCT"}
@@ -520,21 +609,21 @@ if(submitBtn) {
 ║ Product ID: ${currentOrderId}
 ║
 ║ 💰 PRICE DETAILS:
-║ Final Price: ₹${currentOrderPrice}
+║ Total Price: ₹${currentOrderPrice}
 ║ Discount Applied: ${discountPercent}% OFF
 ║ Monthly Offer: ${isMonthlyOfferDay() ? "YES (10%)" : "NO"}
 ║
-║ 📎 Payment screenshot attached separately.
-╚═══════════════════════════════════════╝
+║ 📎 Payment screenshot attached below.
+╚═══════════════════════════════════════════════════════╝
             `;
             if(currentOrderType === 'drawing') {
-                markDrawingBuyer(currentCustomerEmail || 'customer@example.com');
+                markDrawingBuyer(window.deliveryDetails?.email);
             } else if(currentOrderType === 'keychain') {
-                markKeychainBuyer(currentCustomerEmail || 'customer@example.com');
+                markKeychainBuyer(window.deliveryDetails?.email);
             }
         }
         
-        // Prepare email data with commission image if exists
+        // Prepare email data
         const emailData = {
             product_name: currentOrderName,
             product_id: currentOrderId,
@@ -542,7 +631,7 @@ if(submitBtn) {
             frame_type: currentOrderType === "commission" ? "Commission Order" : "Product Purchase",
             total_price: currentOrderPrice,
             commission_details: emailMessage,
-            user_email: currentCustomerEmail || "customer@example.com",
+            user_email: currentCustomerEmail || (window.deliveryDetails?.email) || "customer@example.com",
             message: emailMessage
         };
         
@@ -558,10 +647,10 @@ if(submitBtn) {
             emailData
         )
         .then(function() {
-            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\nWe'll contact you within 24 hours via email/Instagram.\n\n📧 Check your email for confirmation.\n🖼️ Your reference image has been received.");
+            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\n📦 We'll ship your order within 3-5 business days.\n📧 A confirmation email has been sent.\n📞 We'll contact you if needed.");
             document.getElementById("paymentPopup").style.display = "none";
             
-            // Reset commission form
+            // Reset forms
             if(currentOrderType === "commission") {
                 const form = document.getElementById("commissionForm");
                 if(form) form.reset();
@@ -575,12 +664,13 @@ if(submitBtn) {
             currentCustomerEmail = null;
             currentReferenceImage = null;
             window.commissionDetails = null;
+            window.deliveryDetails = null;
             
             if(screenshot) screenshot.value = "";
         })
         .catch(function(error) {
             console.error("Email error:", error);
-            alert("❌ Order received but notification failed.\n\nPlease DM your screenshot and reference image on Instagram @kanishkv_456\n\nWe will process your order manually.");
+            alert("❌ Order received but notification failed.\n\nPlease DM your screenshot on Instagram @kanishkv_456\n\nWe will process your order manually.");
             document.getElementById("paymentPopup").style.display = "none";
         });
     });
@@ -624,7 +714,7 @@ async function loadHomeProducts() {
                     <div class="buttons" style="padding:10px;">
                         <button onclick="addWishlist('${drawing.name.replace(/'/g, "\\'")}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
                         <button onclick="addCart('${drawing.name.replace(/'/g, "\\'")}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
-                        <button onclick="buyNow('${drawing.name.replace(/'/g, "\\'")}', ${discountedPrice}, 'drawing', ${drawing.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
+                        <button onclick="showDeliveryForm('${drawing.name.replace(/'/g, "\\'")}', ${discountedPrice}, 'drawing', ${drawing.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
                     </div>
                 </div>`;
             }).join('');
@@ -663,7 +753,7 @@ async function loadHomeProducts() {
                     <div class="buttons" style="padding:10px;">
                         <button onclick="addWishlist('${keychain.name.replace(/'/g, "\\'")}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
                         <button onclick="addCart('${keychain.name.replace(/'/g, "\\'")}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
-                        <button onclick="buyNow('${keychain.name.replace(/'/g, "\\'")}', ${discountedPrice}, 'keychain', ${keychain.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
+                        <button onclick="showDeliveryForm('${keychain.name.replace(/'/g, "\\'")}', ${discountedPrice}, 'keychain', ${keychain.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
                     </div>
                 </div>`;
             }).join('');
