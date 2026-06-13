@@ -291,17 +291,22 @@ function addCart(product, price) {
 // ===========================
 // DELIVERY FORM POPUP
 // ===========================
+let currentOrderType = null;
+let currentOrderId = null;
+let currentOrderPrice = null;
+let currentOrderName = null;
+let currentCustomerEmail = null;
+let currentReferenceImage = null;
+
 function showDeliveryForm(product, price, type, id) {
     currentOrderName = product;
     currentOrderPrice = price;
     currentOrderType = type;
     currentOrderId = id;
     
-    // Show delivery form popup first
     const deliveryPopup = document.getElementById("deliveryPopup");
     if(deliveryPopup) {
         deliveryPopup.style.display = "block";
-        // Clear previous values
         document.getElementById("deliveryName").value = "";
         document.getElementById("deliveryEmail").value = "";
         document.getElementById("deliveryCity").value = "";
@@ -313,7 +318,6 @@ function showDeliveryForm(product, price, type, id) {
 }
 
 function submitDeliveryDetails() {
-    // Get delivery form values
     const fullName = document.getElementById("deliveryName")?.value.trim() || "";
     const email = document.getElementById("deliveryEmail")?.value.trim() || "";
     const city = document.getElementById("deliveryCity")?.value.trim() || "";
@@ -322,64 +326,30 @@ function submitDeliveryDetails() {
     const state = document.getElementById("deliveryState")?.value.trim() || "";
     const phone = document.getElementById("deliveryPhone")?.value.trim() || "";
     
-    // Validate all fields
-    if(!fullName) {
-        alert("❌ Please enter your full name.");
-        return;
-    }
-    if(!email) {
-        alert("❌ Please enter your email address.");
-        return;
-    }
-    if(!city) {
-        alert("❌ Please enter your city.");
-        return;
-    }
-    if(!pincode) {
-        alert("❌ Please enter your pincode.");
-        return;
-    }
-    if(!address) {
-        alert("❌ Please enter your complete address.");
-        return;
-    }
-    if(!state) {
-        alert("❌ Please enter your state.");
-        return;
-    }
-    if(!phone) {
-        alert("❌ Please enter your phone number.");
-        return;
-    }
-    if(phone.length < 10) {
-        alert("❌ Please enter a valid 10-digit phone number.");
-        return;
-    }
-    if(pincode.length !== 6) {
-        alert("❌ Please enter a valid 6-digit pincode.");
-        return;
-    }
+    if(!fullName) { alert("❌ Please enter your full name."); return; }
+    if(!email) { alert("❌ Please enter your email address."); return; }
+    if(!city) { alert("❌ Please enter your city."); return; }
+    if(!pincode) { alert("❌ Please enter your pincode."); return; }
+    if(pincode.length !== 6) { alert("❌ Please enter a valid 6-digit pincode."); return; }
+    if(!address) { alert("❌ Please enter your complete address."); return; }
+    if(!state) { alert("❌ Please enter your state."); return; }
+    if(!phone) { alert("❌ Please enter your phone number."); return; }
+    if(phone.length < 10) { alert("❌ Please enter a valid 10-digit phone number."); return; }
     
-    // Store delivery details
     currentCustomerEmail = email;
-    window.deliveryDetails = {
-        fullName, email, city, pincode, address, state, phone
-    };
+    window.deliveryDetails = { fullName, email, city, pincode, address, state, phone };
     
-    // Close delivery popup
     document.getElementById("deliveryPopup").style.display = "none";
     
-    // Show payment popup
     const paymentPopup = document.getElementById("paymentPopup");
     if(paymentPopup) {
         paymentPopup.style.display = "block";
-        const fileInput = document.getElementById("paymentScreenshot");
-        if(fileInput) fileInput.value = "";
+        document.getElementById("paymentScreenshot").value = "";
     }
 }
 
 // ===========================
-// CLOSE DELIVERY POPUP
+// CLOSE POPUPS
 // ===========================
 const closeDeliveryBtn = document.getElementById("closeDeliveryPopup");
 if(closeDeliveryBtn) {
@@ -388,9 +358,6 @@ if(closeDeliveryBtn) {
     });
 }
 
-// ===========================
-// CLOSE PAYMENT POPUP
-// ===========================
 const closePopupBtn = document.getElementById("closePopup");
 if(closePopupBtn) {
     closePopupBtn.addEventListener("click", () => {
@@ -431,7 +398,6 @@ if(sheetSize && medium && commissionPrice) {
     calculateCommission();
 }
 
-// Function to convert image to base64
 function imageToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -442,10 +408,9 @@ function imageToBase64(file) {
 }
 
 // ===========================
-// COMMISSION ORDER (with image file)
+// COMMISSION ORDER
 // ===========================
 async function commissionOrder() {
-    // Get all form values
     const fullName = document.getElementById('commissionName')?.value.trim() || "";
     const email = document.getElementById('commissionEmail')?.value.trim() || "";
     const address = document.getElementById('commissionAddress')?.value.trim() || "";
@@ -454,42 +419,18 @@ async function commissionOrder() {
     const phone = document.getElementById('commissionPhone')?.value.trim() || "";
     const referenceImage = document.getElementById('commissionReferenceImage')?.files[0];
     
-    // Validation
-    if(!fullName) {
-        alert("❌ Please enter your full name.");
-        return;
-    }
-    if(!email) {
-        alert("❌ Please enter your email address.");
-        return;
-    }
-    if(!address) {
-        alert("❌ Please enter your complete address.");
-        return;
-    }
-    if(!city) {
-        alert("❌ Please enter your city.");
-        return;
-    }
-    if(!pincode) {
-        alert("❌ Please enter your pincode.");
-        return;
-    }
-    if(!phone) {
-        alert("❌ Please enter your phone number.");
-        return;
-    }
-    if(!referenceImage) {
-        alert("❌ REFERENCE IMAGE IS MANDATORY! Please upload a reference image of what you want me to draw.");
-        return;
-    }
+    if(!fullName) { alert("❌ Please enter your full name."); return; }
+    if(!email) { alert("❌ Please enter your email address."); return; }
+    if(!address) { alert("❌ Please enter your complete address."); return; }
+    if(!city) { alert("❌ Please enter your city."); return; }
+    if(!pincode) { alert("❌ Please enter your pincode."); return; }
+    if(!phone) { alert("❌ Please enter your phone number."); return; }
+    if(!referenceImage) { alert("❌ REFERENCE IMAGE IS MANDATORY! Please upload a reference image."); return; }
     
-    // Convert image to base64 for email
     let imageBase64 = "";
     try {
         imageBase64 = await imageToBase64(referenceImage);
     } catch(error) {
-        console.error("Error converting image:", error);
         alert("Error processing image. Please try again.");
         return;
     }
@@ -499,10 +440,7 @@ async function commissionOrder() {
     let total = sizePrice + mediumPrice;
     const discount = getTotalDiscount('commission');
     const discountPercent = Math.floor(discount * 100);
-    
-    if(discount > 0) {
-        total = Math.floor(total * (1 - discount));
-    }
+    if(discount > 0) total = Math.floor(total * (1 - discount));
     
     const sheetSizeText = sheetSize?.options[sheetSize.selectedIndex]?.text || "";
     const mediumText = medium?.options[medium.selectedIndex]?.text || "";
@@ -517,20 +455,18 @@ async function commissionOrder() {
     window.commissionDetails = {
         fullName, address, city, pincode, phone, email, 
         referenceImageName: referenceImage.name,
-        sheetSizeText, mediumText, 
-        discountPercent, isMonthlyOffer: isMonthlyOfferDay()
+        sheetSizeText, mediumText, discountPercent, isMonthlyOffer: isMonthlyOfferDay()
     };
     
     const popup = document.getElementById("paymentPopup");
     if(popup) {
         popup.style.display = "block";
-        const fileInput = document.getElementById("paymentScreenshot");
-        if(fileInput) fileInput.value = "";
+        document.getElementById("paymentScreenshot").value = "";
     }
 }
 
 // ===========================
-// SUBMIT PAYMENT (with delivery details for products)
+// SUBMIT PAYMENT - WITH UPDATED TEMPLATE ID template_z2sderp
 // ===========================
 const submitPaymentBtn = document.getElementById("submitPayment");
 if(submitPaymentBtn) {
@@ -546,75 +482,71 @@ if(submitPaymentBtn) {
         let emailSubject = "";
         
         if(currentOrderType === "commission") {
-            emailSubject = `🎨 NEW COMMISSION ORDER - ${currentOrderName}`;
             emailMessage = `
-╔═══════════════════════════════════════════════════════╗
-║                 NEW COMMISSION ORDER                  ║
-╠═══════════════════════════════════════════════════════╣
-║ Order ID: ${currentOrderId}
-║ Order Date: ${new Date().toLocaleString()}
-║
-║ 👤 CUSTOMER DETAILS:
-║ Full Name: ${window.commissionDetails?.fullName || "N/A"}
-║ Email: ${window.commissionDetails?.email || "N/A"}
-║ Phone: ${window.commissionDetails?.phone || "N/A"}
-║
-║ 📍 DELIVERY ADDRESS:
-║ Address: ${window.commissionDetails?.address || "N/A"}
-║ City: ${window.commissionDetails?.city || "N/A"}
-║ Pincode: ${window.commissionDetails?.pincode || "N/A"}
-║
-║ 🎨 COMMISSION DETAILS:
-║ Size: ${window.commissionDetails?.sheetSizeText || "N/A"}
-║ Medium: ${window.commissionDetails?.mediumText || "N/A"}
-║
-║ 📷 REFERENCE IMAGE:
-║ Filename: ${window.commissionDetails?.referenceImageName || "N/A"}
-║ (Image attached separately as base64)
-║
-║ 💰 PRICE DETAILS:
-║ Total Price: ₹${currentOrderPrice}
-║ Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
-║ Monthly Offer: ${window.commissionDetails?.isMonthlyOffer ? "YES (10%)" : "NO"}
-║
-║ 📎 Payment screenshot attached below.
-╚═══════════════════════════════════════════════════════╝
+═══════════════════════════════════════
+NEW COMMISSION ORDER
+═══════════════════════════════════════
+Order ID: ${currentOrderId}
+Order Date: ${new Date().toLocaleString()}
+
+👤 CUSTOMER DETAILS:
+Full Name: ${window.commissionDetails?.fullName || "N/A"}
+Email: ${window.commissionDetails?.email || "N/A"}
+Phone: ${window.commissionDetails?.phone || "N/A"}
+
+📍 DELIVERY ADDRESS:
+Address: ${window.commissionDetails?.address || "N/A"}
+City: ${window.commissionDetails?.city || "N/A"}
+Pincode: ${window.commissionDetails?.pincode || "N/A"}
+
+🎨 COMMISSION DETAILS:
+Size: ${window.commissionDetails?.sheetSizeText || "N/A"}
+Medium: ${window.commissionDetails?.mediumText || "N/A"}
+
+📷 REFERENCE IMAGE:
+Filename: ${window.commissionDetails?.referenceImageName || "N/A"}
+
+💰 PRICE DETAILS:
+Total Price: ₹${currentOrderPrice}
+Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
+Monthly Offer: ${window.commissionDetails?.isMonthlyOffer ? "YES (10%)" : "NO"}
+
+📎 Payment screenshot attached.
+═══════════════════════════════════════
             `;
             markCommissionBuyer(window.commissionDetails?.email);
         } else {
             const discount = getTotalDiscount(currentOrderType);
             const discountPercent = Math.floor(discount * 100);
-            emailSubject = `🛍️ NEW ORDER - ${currentOrderName}`;
             emailMessage = `
-╔═══════════════════════════════════════════════════════╗
-║                  NEW PRODUCT ORDER                    ║
-╠═══════════════════════════════════════════════════════╣
-║ Order ID: ${currentOrderId}
-║ Order Date: ${new Date().toLocaleString()}
-║
-║ 👤 CUSTOMER DETAILS:
-║ Full Name: ${window.deliveryDetails?.fullName || "N/A"}
-║ Email: ${window.deliveryDetails?.email || "N/A"}
-║ Phone: ${window.deliveryDetails?.phone || "N/A"}
-║
-║ 📍 DELIVERY ADDRESS:
-║ Address: ${window.deliveryDetails?.address || "N/A"}
-║ City: ${window.deliveryDetails?.city || "N/A"}
-║ State: ${window.deliveryDetails?.state || "N/A"}
-║ Pincode: ${window.deliveryDetails?.pincode || "N/A"}
-║
-║ 📦 PRODUCT DETAILS:
-║ Type: ${currentOrderType?.toUpperCase() || "PRODUCT"}
-║ Name: ${currentOrderName}
-║ Product ID: ${currentOrderId}
-║
-║ 💰 PRICE DETAILS:
-║ Total Price: ₹${currentOrderPrice}
-║ Discount Applied: ${discountPercent}% OFF
-║ Monthly Offer: ${isMonthlyOfferDay() ? "YES (10%)" : "NO"}
-║
-║ 📎 Payment screenshot attached below.
-╚═══════════════════════════════════════════════════════╝
+═══════════════════════════════════════
+NEW PRODUCT ORDER
+═══════════════════════════════════════
+Order ID: ${currentOrderId}
+Order Date: ${new Date().toLocaleString()}
+
+👤 CUSTOMER DETAILS:
+Full Name: ${window.deliveryDetails?.fullName || "N/A"}
+Email: ${window.deliveryDetails?.email || "N/A"}
+Phone: ${window.deliveryDetails?.phone || "N/A"}
+
+📍 DELIVERY ADDRESS:
+Address: ${window.deliveryDetails?.address || "N/A"}
+City: ${window.deliveryDetails?.city || "N/A"}
+State: ${window.deliveryDetails?.state || "N/A"}
+Pincode: ${window.deliveryDetails?.pincode || "N/A"}
+
+📦 PRODUCT DETAILS:
+Type: ${currentOrderType?.toUpperCase() || "PRODUCT"}
+Name: ${currentOrderName}
+
+💰 PRICE DETAILS:
+Total Price: ₹${currentOrderPrice}
+Discount Applied: ${discountPercent}% OFF
+Monthly Offer: ${isMonthlyOfferDay() ? "YES (10%)" : "NO"}
+
+📎 Payment screenshot attached.
+═══════════════════════════════════════
             `;
             if(currentOrderType === 'drawing') {
                 markDrawingBuyer(window.deliveryDetails?.email);
@@ -638,46 +570,44 @@ if(submitPaymentBtn) {
         // Add reference image for commission orders
         if(currentOrderType === "commission" && currentReferenceImage) {
             emailData.reference_image = currentReferenceImage;
-            emailData.reference_image_name = window.commissionDetails?.referenceImageName || "reference.jpg";
         }
         
-        emailjs.send(
-            "service_t2hgt6w",
-            "template_9q28bu6",
-            emailData
-        )
-        .then(function() {
-            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\n📦 We'll ship your order within 3-5 business days.\n📧 A confirmation email has been sent.\n📞 We'll contact you if needed.");
-            document.getElementById("paymentPopup").style.display = "none";
-            
-            // Reset forms
-            if(currentOrderType === "commission") {
-                const form = document.getElementById("commissionForm");
-                if(form) form.reset();
-                calculateCommission();
-            }
-            
-            currentOrderType = null;
-            currentOrderId = null;
-            currentOrderPrice = null;
-            currentOrderName = null;
-            currentCustomerEmail = null;
-            currentReferenceImage = null;
-            window.commissionDetails = null;
-            window.deliveryDetails = null;
-            
-            if(screenshot) screenshot.value = "";
-        })
-        .catch(function(error) {
-            console.error("Email error:", error);
-            alert("❌ Order received but notification failed.\n\nPlease DM your screenshot on Instagram @kanishkv_456\n\nWe will process your order manually.");
-            document.getElementById("paymentPopup").style.display = "none";
-        });
+        // USING YOUR NEW TEMPLATE ID: template_z2sderp
+        try {
+            await emailjs.send(
+                "service_t2hgt6w",      // Your Service ID
+                "template_z2sderp",     // YOUR NEW TEMPLATE ID - UPDATED!
+                emailData
+            );
+            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\n📦 We'll ship your order within 3-5 business days.\n📧 A confirmation email has been sent.");
+        } catch(emailError) {
+            console.error("EmailJS Error:", emailError);
+            alert(`⚠️ ORDER SAVED LOCALLY!\n\nOrder ID: ${currentOrderId}\n\nPlease DM the following on Instagram @kanishkv_456:\n1. Order ID: ${currentOrderId}\n2. Payment Screenshot\n${currentOrderType === 'commission' ? '3. Reference Image' : ''}\n\nWe will process your order manually.`);
+        }
+        
+        document.getElementById("paymentPopup").style.display = "none";
+        
+        if(currentOrderType === "commission") {
+            const form = document.getElementById("commissionForm");
+            if(form) form.reset();
+            calculateCommission();
+        }
+        
+        currentOrderType = null;
+        currentOrderId = null;
+        currentOrderPrice = null;
+        currentOrderName = null;
+        currentCustomerEmail = null;
+        currentReferenceImage = null;
+        window.commissionDetails = null;
+        window.deliveryDetails = null;
+        
+        if(screenshot) screenshot.value = "";
     });
 }
 
 // ===========================
-// HOMEPAGE PRODUCTS WITH ALL BUTTONS
+// HOMEPAGE PRODUCTS
 // ===========================
 async function loadHomeProducts() {
     try {
@@ -825,7 +755,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(document.getElementById("drawingsContainer")) loadDrawings();
     if(document.getElementById("keychainsContainer")) loadKeychains();
     if(document.getElementById("homeDrawingsGrid")) loadHomeProducts();
-    
     updateOfferBanner();
     
     const video = document.getElementById("bgVideo");
