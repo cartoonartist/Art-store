@@ -8,13 +8,34 @@ let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
 updateCounters();
 
 // ===========================
-// UPDATE COUNTERS
+// MONTHLY OFFER CHECK (10% off on 1st day of every month)
 // ===========================
-function updateCounters() {
-    const cartCount = document.getElementById("cartCount");
-    const wishlistCount = document.getElementById("wishlistCount");
-    if(cartCount) cartCount.innerText = cart.length;
-    if(wishlistCount) wishlistCount.innerText = wishlist.length;
+function isMonthlyOfferDay() {
+    const today = new Date();
+    return today.getDate() === 1; // Returns true if it's the 1st day of the month
+}
+
+function getMonthlyOfferDiscount() {
+    return isMonthlyOfferDay() ? 0.10 : 0; // 10% off on 1st of month
+}
+
+function getTotalDiscount(productType) {
+    let totalDiscount = 0;
+    
+    // Monthly offer (10% off on 1st of month)
+    totalDiscount += getMonthlyOfferDiscount();
+    
+    // First customer offers
+    if(productType === 'drawing') {
+        totalDiscount += getDrawingDiscount();
+    } else if(productType === 'keychain') {
+        totalDiscount += getKeychainDiscount();
+    } else if(productType === 'commission') {
+        totalDiscount += getCommissionDiscount();
+    }
+    
+    // Cap discount at maximum 50%
+    return Math.min(totalDiscount, 0.50);
 }
 
 // ===========================
@@ -58,7 +79,20 @@ function markCommissionBuyer(email) {
 }
 
 // ===========================
-// LOAD DRAWINGS FROM JSON (15 items)
+// GET OFFER BANNER TEXT
+// ===========================
+function getOfferBannerText() {
+    let bannerText = "";
+    if(isMonthlyOfferDay()) {
+        bannerText = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
+    } else {
+        bannerText = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
+    }
+    return bannerText;
+}
+
+// ===========================
+// LOAD DRAWINGS FROM JSON
 // ===========================
 let currentDrawingsPage = 1;
 const drawingsPerPage = 6;
@@ -83,7 +117,6 @@ function renderDrawings() {
     const start = (currentDrawingsPage - 1) * drawingsPerPage;
     const end = start + drawingsPerPage;
     const pageDrawings = allDrawings.slice(start, end);
-    const discount = getDrawingDiscount();
     
     if(pageDrawings.length === 0) {
         container.innerHTML = "<p style='text-align:center;'>No drawings available.</p>";
@@ -93,8 +126,14 @@ function renderDrawings() {
     
     container.innerHTML = pageDrawings.map(drawing => {
         const originalPrice = drawing.price + drawing.delivery;
-        const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
-        const discountText = discount > 0 ? `<span style="color:#00ff88; font-size:14px;"> (20% OFF! Was ₹${originalPrice})</span>` : '';
+        const totalDiscount = getTotalDiscount('drawing');
+        const discountedPrice = totalDiscount > 0 ? Math.floor(originalPrice * (1 - totalDiscount)) : originalPrice;
+        
+        let discountText = "";
+        if(totalDiscount > 0) {
+            const discountPercent = Math.floor(totalDiscount * 100);
+            discountText = `<span style="color:#00ff88; font-size:14px;"> (${discountPercent}% OFF! Was ₹${originalPrice})</span>`;
+        }
         
         return `
         <div class="card">
@@ -102,7 +141,7 @@ function renderDrawings() {
             <h3>${drawing.name}</h3>
             <p>${drawing.description}</p>
             <p>Size: ${drawing.size} | Paper: ${drawing.paper}</p>
-            <p><strong style="color:#00ff88;">🔥 Offer Price: ₹${discountedPrice}</strong>${discountText}</p>
+            <p><strong style="color:#00ff88;">🔥 Price: ₹${discountedPrice}</strong>${discountText}</p>
             ${drawing.sold ? '<div class="sold-badge">SOLD OUT</div>' : `
                 <div class="buttons">
                     <button onclick="addWishlist('${drawing.name}')">❤️ Wishlist</button>
@@ -141,7 +180,7 @@ function goToDrawingsPage(page) {
 }
 
 // ===========================
-// LOAD KEYCHAINS FROM JSON (15 items)
+// LOAD KEYCHAINS FROM JSON
 // ===========================
 let currentKeychainsPage = 1;
 const keychainsPerPage = 6;
@@ -166,7 +205,6 @@ function renderKeychains() {
     const start = (currentKeychainsPage - 1) * keychainsPerPage;
     const end = start + keychainsPerPage;
     const pageKeychains = allKeychains.slice(start, end);
-    const discount = getKeychainDiscount();
     
     if(pageKeychains.length === 0) {
         container.innerHTML = "<p style='text-align:center;'>No keychains available.</p>";
@@ -176,15 +214,21 @@ function renderKeychains() {
     
     container.innerHTML = pageKeychains.map(keychain => {
         const originalPrice = keychain.price;
-        const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
-        const discountText = discount > 0 ? `<span style="color:#00ff88; font-size:14px;"> (20% OFF! Was ₹${originalPrice})</span>` : '';
+        const totalDiscount = getTotalDiscount('keychain');
+        const discountedPrice = totalDiscount > 0 ? Math.floor(originalPrice * (1 - totalDiscount)) : originalPrice;
+        
+        let discountText = "";
+        if(totalDiscount > 0) {
+            const discountPercent = Math.floor(totalDiscount * 100);
+            discountText = `<span style="color:#00ff88; font-size:14px;"> (${discountPercent}% OFF! Was ₹${originalPrice})</span>`;
+        }
         
         return `
         <div class="card">
             <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
             <h3>${keychain.name}</h3>
             <p>${keychain.description}</p>
-            <p><strong style="color:#00ff88;">🔥 Offer Price: ₹${discountedPrice}</strong>${discountText}</p>
+            <p><strong style="color:#00ff88;">🔥 Price: ₹${discountedPrice}</strong>${discountText}</p>
             <p style="font-size:12px;">${keychain.deliveryIncluded ? '✓ Delivery included' : '+ delivery extra'}</p>
             ${keychain.sold ? '<div class="sold-badge">SOLD OUT</div>' : `
                 <div class="buttons">
@@ -300,9 +344,9 @@ function calculateCommission() {
         const sizePrice = parseInt(sheetSize.value) || 0;
         const mediumPrice = parseInt(medium.value) || 0;
         let total = sizePrice + mediumPrice;
-        const discount = getCommissionDiscount();
-        if(discount > 0) {
-            total = Math.floor(total * (1 - discount));
+        const totalDiscount = getTotalDiscount('commission');
+        if(totalDiscount > 0) {
+            total = Math.floor(total * (1 - totalDiscount));
         }
         commissionPrice.innerText = "Total : ₹" + total;
     }
@@ -315,17 +359,17 @@ if(sheetSize && medium && commissionPrice) {
 }
 
 // ===========================
-// COMMISSION ORDER (FIXED with reference image)
+// COMMISSION ORDER
 // ===========================
 function commissionOrder() {
     const sizePrice = parseInt(sheetSize?.value) || 0;
     const mediumPrice = parseInt(medium?.value) || 0;
     let total = sizePrice + mediumPrice;
-    const discount = getCommissionDiscount();
-    const discountPercent = discount * 100;
+    const totalDiscount = getTotalDiscount('commission');
+    const discountPercent = Math.floor(totalDiscount * 100);
     
-    if(discount > 0) {
-        total = Math.floor(total * (1 - discount));
+    if(totalDiscount > 0) {
+        total = Math.floor(total * (1 - totalDiscount));
     }
     
     // Get form values
@@ -364,7 +408,7 @@ function commissionOrder() {
 }
 
 // ===========================
-// SUBMIT PAYMENT (FIXED)
+// SUBMIT PAYMENT
 // ===========================
 const submitBtn = document.getElementById("submitPayment");
 if(submitBtn) {
@@ -391,20 +435,22 @@ if(submitBtn) {
                 Phone: ${window.commissionDetails?.phone || "N/A"}
                 Details: ${window.commissionDetails?.mediumText || "N/A"} on ${window.commissionDetails?.sheetSizeText || "N/A"}
                 Reference Image Description: ${window.commissionDetails?.referenceDesc || "N/A"}
-                Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF (First 10 customers)
+                Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
                 Total Price: ₹${currentOrderPrice}
                 Order Date: ${new Date().toLocaleString()}
             `;
             markCommissionBuyer(window.commissionDetails?.email);
         } else {
+            const totalDiscount = getTotalDiscount(currentOrderType);
+            const discountPercent = Math.floor(totalDiscount * 100);
             emailSubject = `NEW ORDER - ${currentOrderName}`;
-            let discountApplied = currentOrderType === 'drawing' ? getDrawingDiscount() * 100 : getKeychainDiscount() * 100;
             emailMessage = `
                 ORDER TYPE: ${currentOrderType?.toUpperCase() || "PRODUCT"}
                 Product: ${currentOrderName}
                 Product ID: ${currentOrderId}
+                Original Price: ₹${Math.floor(currentOrderPrice / (1 - totalDiscount)) || currentOrderPrice}
+                Discount Applied: ${discountPercent}% OFF
                 Total Price: ₹${currentOrderPrice}
-                Discount Applied: ${discountApplied}% OFF (First 20 customers)
                 Order Date: ${new Date().toLocaleString()}
             `;
             if(currentOrderType === 'drawing') {
@@ -412,6 +458,11 @@ if(submitBtn) {
             } else if(currentOrderType === 'keychain') {
                 markKeychainBuyer(currentCustomerEmail || 'customer@example.com');
             }
+        }
+        
+        // Add monthly offer info to email
+        if(isMonthlyOfferDay()) {
+            emailMessage += `\n\n🎉 MONTHLY SPECIAL: 10% OFF applied (1st Day Offer) 🎉`;
         }
         
         emailjs.send(
@@ -447,6 +498,18 @@ if(submitBtn) {
             console.error("Email error:", error);
             alert("❌ Order received but notification failed. Please DM on Instagram @kanishkv_456 with your screenshot.");
         });
+    });
+}
+
+// ===========================
+// UPDATE OFFER BANNER ON ALL PAGES
+// ===========================
+function updateOfferBanner() {
+    const banners = document.querySelectorAll('.offer-banner');
+    banners.forEach(banner => {
+        if(banner) {
+            banner.innerHTML = getOfferBannerText();
+        }
     });
 }
 
@@ -502,6 +565,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Load products based on current page
     if(document.getElementById("drawingsContainer")) loadDrawings();
     if(document.getElementById("keychainsContainer")) loadKeychains();
+    
+    // Update offer banners
+    updateOfferBanner();
     
     // Video autoplay
     const video = document.getElementById("bgVideo");
