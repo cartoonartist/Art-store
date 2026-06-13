@@ -19,22 +19,11 @@
             <li><a href="drawings.html">Drawings</a></li>
             <li><a href="keychains.html">Keychains</a></li>
             <li><a href="commissions.html">Commission</a></li>
-            <li>
-                <a href="#">
-                    Wishlist
-                    <span id="wishlistCount">0</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    Cart
-                    <span id="cartCount">0</span>
-                </a>
-            </li>
+            <li><a href="#">Wishlist <span id="wishlistCount">0</span></a></li>
+            <li><a href="#">Cart <span id="cartCount">0</span></a></li>
         </ul>
     </nav>
 
-    <!-- Offer Banner -->
     <div class="offer-banner" style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 12px; text-align: center; color: white; font-weight: bold;">
         <span id="offerBannerText">Loading offers...</span>
     </div>
@@ -45,12 +34,12 @@
         <div id="keychainsPagination"></div>
     </section>
 
-    <!-- PAYMENT POPUP -->
     <div id="paymentPopup" class="popup">
         <div class="popup-content">
             <span id="closePopup">&times;</span>
             <h2>Complete Payment</h2>
             <img src="images/QR.jpg" alt="QR Code" class="qr">
+            <p>Scan QR code & pay the exact amount</p>
             <input type="file" id="paymentScreenshot" accept="image/*" required>
             <button id="submitPayment">Submit Payment Proof</button>
         </div>
@@ -62,21 +51,6 @@
         <p>Instagram : @kanishkv_456</p>
     </footer>
 
-    <script>
-        function updateOfferBanner() {
-            const today = new Date();
-            const isFirstDay = today.getDate() === 1;
-            const bannerSpan = document.getElementById('offerBannerText');
-            if(bannerSpan) {
-                if(isFirstDay) {
-                    bannerSpan.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
-                } else {
-                    bannerSpan.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
-                }
-            }
-        }
-        document.addEventListener('DOMContentLoaded', updateOfferBanner);
-    </script>
     <script src="script.js"></script>
 </body>
 </html>
