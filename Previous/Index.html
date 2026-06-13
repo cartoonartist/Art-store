@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanishk Art Store</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<video id="bgVideo" autoplay muted loop playsinline preload="auto">
+    <source src="videos/galaxy.mp4" type="video/mp4">
+</video>
+
+<div id="videoOverlay"></div>
+    
+
+    <!-- Floating Art Supplies -->
+    <div id="floatingContainer">
+
+        <div class="floating-item">🎨</div>
+        <div class="floating-item">✏️</div>
+        <div class="floating-item">🖌️</div>
+        <div class="floating-item">📏</div>
+        <div class="floating-item">🖍️</div>
+        <div class="floating-item">✂️</div>
+
+    </div>
+
+    <!-- Navbar -->
+
+    <nav>
+
+        <div class="logo">
+            KANISHK ART STORE
+        </div>
+
+        <ul>
+
+            <li><a href="#home">Home</a></li>
+
+            <li><a href="#drawings">Drawings</a></li>
+
+            <li><a href="#keychains">Keychains</a></li>
+
+            <li><a href="#commission">Commission</a></li>
+
+            <li>
+                <a href="#">
+                    Wishlist
+                    <span id="wishlistCount">0</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#">
+                    Cart
+                    <span id="cartCount">0</span>
+                </a>
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <!-- Hero Section -->
+
+    <section id="home" class="hero">
+
+        <h1>WELCOME TO MY ART WORLD</h1>
+
+        <p>
+            Handmade Drawings • Custom Commission Artwork • Keychains
+        </p>
+
+        <a href="#drawings" class="hero-btn">
+            Explore Collection
+        </a>
+
+    </section>
+
+    <!-- Instagram -->
+
+    <section class="instagram-box">
+
+        <h2>CONTACT ME ON INSTAGRAM</h2>
+
+        <p>
+            YOU CAN DM / COMMENT ME ON INSTAGRAM
+        </p>
+
+        <h3>@kanishkv_456</h3>
+
+    </section>
+
+    <!-- DRAWINGS SECTION -->
+
+    <section id="drawings" class="section">
+
+        <h2 class="section-title">
+            DRAWINGS
+        </h2>
+
+        <div class="product-grid">
+
+            <!-- Drawing 1 -->
+
+            <div class="card">
+
+                <img src="images/drawings/art1.jpg" alt="Drawing">
+
+                <h3>Artwork #1</h3>
+
+                <p>Size : A4</p>
+
+                <p>Paper : 70 GSM</p>
+
+                <p>Price : ₹200</p>
+
+                <p>Delivery : ₹50</p>
+
+                <div class="frame-option">
+
+                    <label>
+
+                        <input type="radio"
+                               name="frame1"
+                               value="250"
+                               checked>
+
+                        Laminated (Free)
+
+                    </label>
+
+                    <label>
+
+                        <input type="radio"
+                               name="frame1"
+                               value="350">
+
+                        Framed (+₹100)
+
+                    </label>
+
+                </div>
+
+                <div class="buttons">
+
+                    <button onclick="addWishlist('Artwork #1')">
+                        Wishlist
+                    </button>
+
+                    <button onclick="addCart('Artwork #1', getDrawingPrice('frame1'))">
+                      Add To Cart
+                    </button>
+
+                    <button onclick="buyNow('Artwork #1', getDrawingPrice('frame1'))">
+                      Buy Now
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- Drawing 2 -->
+
+            <div class="card">
+
+                <img src="images/drawings/art2.jpg" alt="Drawing">
+
+                <h3>Artwork #2</h3>
+
+                <p>Size : A4</p>
+
+                <p>Paper : 70 GSM</p>
+
+                <p>Price : ₹200</p>
+
+                <p>Delivery : ₹50</p>
+
+                <div class="frame-option">
+
+                    <label>
+                        <input type="radio"
+                               name="frame2"
+                               value="250"
+                               checked>
+
+                        Laminated (Free)
+                    </label>
+
+                    <label>
+
+                        <input type="radio"
+                               name="frame2"
+                               value="350">
+
+                        Framed (+₹100)
+
+                    </label>
+
+                </div>
+
+                <div class="buttons">
+
+                    <button onclick="addWishlist('Artwork #2')">
+                        Wishlist
+                    </button>
+
+                    <button onclick="addCart('Artwork #2', getDrawingPrice('frame2'))">
+                      Add To Cart
+                    </button>
+
+                    <button onclick="buyNow('Artwork #2', getDrawingPrice('frame2'))">
+                      Buy Now
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- KEYCHAIN SECTION -->
+
+    <section id="keychains" class="section">
+
+        <h2 class="section-title">
+            KEYCHAINS
+        </h2>
+
+        <div class="product-grid">
+
+            <div class="card">
+
+                <img src="images/keychains/key1.jpg"
+                     alt="Keychain">
+
+                <h3>Keychain Pack #1</h3>
+
+                <p>10 Pieces Pack</p>
+
+                <p>Price : ₹150</p>
+
+                <p>Delivery Included</p>
+
+                <div class="buttons">
+
+                    <button onclick="addWishlist('Keychain #1')">
+                        Wishlist
+                    </button>
+
+                    <button onclick="addCart('Keychain #1',150)">
+                        Add To Cart
+                    </button>
+
+                    <button onclick="buyNow('Keychain #1',150)">
+                        Buy Now
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- COMMISSION SECTION -->
+
+    <section id="commission" class="section">
+
+        <h2 class="section-title">
+            COMMISSION ARTWORK
+        </h2>
+
+        <form id="commissionForm">
+
+            <input type="text"
+                   placeholder="Full Name"
+                   required>
+
+            <textarea placeholder="Address"
+                      required></textarea>
+
+            <input type="text"
+                   placeholder="City"
+                   required>
+
+            <input type="number"
+                   placeholder="Pincode"
+                   required>
+
+            <input type="tel"
+                   placeholder="Phone Number"
+                   required>
+
+            <select id="sheetSize">
+
+                <option value="0">A5</option>
+
+                <option value="50">A4 (+₹50)</option>
+
+                <option value="100">A3 (+₹100)</option>
+
+                <option value="200">A2 (+₹200)</option>
+
+            </select>
+
+            <select id="medium">
+
+                <option value="350">
+                    Sketch
+                </option>
+
+                <option value="500">
+                    Coloured
+                </option>
+
+            </select>
+
+            <h3 id="commissionPrice">
+                Total : ₹350
+            </h3>
+
+            <button type="button"
+                    onclick="commissionOrder()">
+
+                Order Commission
+
+            </button>
+
+        </form>
+
+    </section>
+
+    <!-- PAYMENT POPUP -->
+
+    <div id="paymentPopup" class="popup">
+
+    <div class="popup-content">
+
+        <span id="closePopup">&times;</span>
+
+        <h2>Complete Payment</h2>
+
+        <img
+            src="images/QR.jpg"
+            alt="QR Code"
+            class="qr"
+        >
+
+        <input
+            type="file"
+            id="paymentScreenshot"
+            accept="image/*"
+            required
+        >
+
+        <button id="submitPayment">
+            Submit Payment Proof
+        </button>
+
+    </div>
+
+    </div>
+        >
+        <div id="paymentPopup" class="popup">
+
+    <div class="popup-content">
+
+        <span id="closePopup">&times;</span>
+
+        <h2>Complete Payment</h2>
+
+        <img src="images/QR.jpg" alt="QR Code">
+
+        <input
+            type="file"
+            id="paymentScreenshot"
+            accept="image/*"
+            required
+        >
+
+        <button id="submitPayment">
+            Submit Payment Proof
+        </button>
+
+    </div>
+
+        </div>
+
+        
+
+    </div>
+
+    </div>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <h3>
+            Kanishk Art Store
+        </h3>
+
+        <p>
+            Handmade Art • Custom Artwork • Keychains
+        </p>
+
+        <p>
+            Instagram : @kanishkv_456
+        </p>
+
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+          </html>
