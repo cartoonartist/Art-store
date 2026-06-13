@@ -12,30 +12,11 @@ updateCounters();
 // ===========================
 function isMonthlyOfferDay() {
     const today = new Date();
-    return today.getDate() === 1; // Returns true if it's the 1st day of the month
+    return today.getDate() === 1;
 }
 
 function getMonthlyOfferDiscount() {
-    return isMonthlyOfferDay() ? 0.10 : 0; // 10% off on 1st of month
-}
-
-function getTotalDiscount(productType) {
-    let totalDiscount = 0;
-    
-    // Monthly offer (10% off on 1st of month)
-    totalDiscount += getMonthlyOfferDiscount();
-    
-    // First customer offers
-    if(productType === 'drawing') {
-        totalDiscount += getDrawingDiscount();
-    } else if(productType === 'keychain') {
-        totalDiscount += getKeychainDiscount();
-    } else if(productType === 'commission') {
-        totalDiscount += getCommissionDiscount();
-    }
-    
-    // Cap discount at maximum 50%
-    return Math.min(totalDiscount, 0.50);
+    return isMonthlyOfferDay() ? 0.10 : 0;
 }
 
 // ===========================
@@ -46,49 +27,58 @@ let keychainBuyers = JSON.parse(localStorage.getItem("keychainBuyers")) || [];
 let commissionBuyers = JSON.parse(localStorage.getItem("commissionBuyers")) || [];
 
 function getDrawingDiscount() {
-    return drawingBuyers.length < 20 ? 0.20 : 0; // 20% off for first 20 customers
+    return drawingBuyers.length < 20 ? 0.20 : 0;
 }
 
 function getKeychainDiscount() {
-    return keychainBuyers.length < 20 ? 0.20 : 0; // 20% off for first 20 customers
+    return keychainBuyers.length < 20 ? 0.20 : 0;
 }
 
 function getCommissionDiscount() {
-    return commissionBuyers.length < 10 ? 0.40 : 0; // 40% off for first 10 customers
+    return commissionBuyers.length < 10 ? 0.40 : 0;
+}
+
+function getTotalDiscount(productType) {
+    let totalDiscount = getMonthlyOfferDiscount();
+    if(productType === 'drawing') {
+        totalDiscount += getDrawingDiscount();
+    } else if(productType === 'keychain') {
+        totalDiscount += getKeychainDiscount();
+    } else if(productType === 'commission') {
+        totalDiscount += getCommissionDiscount();
+    }
+    return Math.min(totalDiscount, 0.50);
 }
 
 function markDrawingBuyer(email) {
-    if(!drawingBuyers.includes(email) && drawingBuyers.length < 20) {
+    if(email && !drawingBuyers.includes(email) && drawingBuyers.length < 20) {
         drawingBuyers.push(email);
         localStorage.setItem("drawingBuyers", JSON.stringify(drawingBuyers));
     }
 }
 
 function markKeychainBuyer(email) {
-    if(!keychainBuyers.includes(email) && keychainBuyers.length < 20) {
+    if(email && !keychainBuyers.includes(email) && keychainBuyers.length < 20) {
         keychainBuyers.push(email);
         localStorage.setItem("keychainBuyers", JSON.stringify(keychainBuyers));
     }
 }
 
 function markCommissionBuyer(email) {
-    if(!commissionBuyers.includes(email) && commissionBuyers.length < 10) {
+    if(email && !commissionBuyers.includes(email) && commissionBuyers.length < 10) {
         commissionBuyers.push(email);
         localStorage.setItem("commissionBuyers", JSON.stringify(commissionBuyers));
     }
 }
 
 // ===========================
-// GET OFFER BANNER TEXT
+// UPDATE COUNTERS
 // ===========================
-function getOfferBannerText() {
-    let bannerText = "";
-    if(isMonthlyOfferDay()) {
-        bannerText = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
-    } else {
-        bannerText = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
-    }
-    return bannerText;
+function updateCounters() {
+    const cartCount = document.getElementById("cartCount");
+    const wishlistCount = document.getElementById("wishlistCount");
+    if(cartCount) cartCount.innerText = cart.length;
+    if(wishlistCount) wishlistCount.innerText = wishlist.length;
 }
 
 // ===========================
@@ -106,7 +96,7 @@ async function loadDrawings() {
     } catch(error) {
         console.error("Error loading drawings:", error);
         const container = document.getElementById("drawingsContainer");
-        if(container) container.innerHTML = "<p>Error loading drawings. Please try again.</p>";
+        if(container) container.innerHTML = "<p style='text-align:center;color:red;'>Error loading drawings. Please make sure drawings.json exists.</p>";
     }
 }
 
@@ -114,25 +104,32 @@ function renderDrawings() {
     const container = document.getElementById("drawingsContainer");
     if(!container) return;
     
+    if(allDrawings.length === 0) {
+        container.innerHTML = "<p style='text-align:center;'>No drawings available.</p>";
+        return;
+    }
+    
     const start = (currentDrawingsPage - 1) * drawingsPerPage;
     const end = start + drawingsPerPage;
     const pageDrawings = allDrawings.slice(start, end);
     
-    if(pageDrawings.length === 0) {
-        container.innerHTML = "<p style='text-align:center;'>No drawings available.</p>";
-        updateDrawingsPagination();
-        return;
-    }
-    
     container.innerHTML = pageDrawings.map(drawing => {
         const originalPrice = drawing.price + drawing.delivery;
-        const totalDiscount = getTotalDiscount('drawing');
-        const discountedPrice = totalDiscount > 0 ? Math.floor(originalPrice * (1 - totalDiscount)) : originalPrice;
+        const discount = getTotalDiscount('drawing');
+        const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+        const discountPercent = Math.floor(discount * 100);
+        const discountHtml = discount > 0 ? `<span style="color:#00ff88; font-size:12px;"> (${discountPercent}% OFF! Was ₹${originalPrice})</span>` : '';
         
-        let discountText = "";
-        if(totalDiscount > 0) {
-            const discountPercent = Math.floor(totalDiscount * 100);
-            discountText = `<span style="color:#00ff88; font-size:14px;"> (${discountPercent}% OFF! Was ₹${originalPrice})</span>`;
+        if(drawing.sold) {
+            return `
+            <div class="card">
+                <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
+                <h3>${drawing.name}</h3>
+                <p>${drawing.description}</p>
+                <p>Size: ${drawing.size} | Paper: ${drawing.paper}</p>
+                <p><strong style="color:#ff4444;">₹${discountedPrice}</strong>${discountHtml}</p>
+                <div class="sold-badge">SOLD OUT</div>
+            </div>`;
         }
         
         return `
@@ -141,16 +138,14 @@ function renderDrawings() {
             <h3>${drawing.name}</h3>
             <p>${drawing.description}</p>
             <p>Size: ${drawing.size} | Paper: ${drawing.paper}</p>
-            <p><strong style="color:#00ff88;">🔥 Price: ₹${discountedPrice}</strong>${discountText}</p>
-            ${drawing.sold ? '<div class="sold-badge">SOLD OUT</div>' : `
-                <div class="buttons">
-                    <button onclick="addWishlist('${drawing.name}')">❤️ Wishlist</button>
-                    <button onclick="addCart('${drawing.name}', ${discountedPrice})">🛒 Cart</button>
-                    <button onclick="buyNow('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})">💳 Buy Now</button>
-                </div>
-            `}
-        </div>
-    `}).join('');
+            <p><strong style="color:#00ff88;">₹${discountedPrice}</strong>${discountHtml}</p>
+            <div class="buttons">
+                <button onclick="addWishlist('${drawing.name}')">❤️ Wishlist</button>
+                <button onclick="addCart('${drawing.name}', ${discountedPrice})">🛒 Cart</button>
+                <button onclick="buyNow('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})">💳 Buy Now</button>
+            </div>
+        </div>`;
+    }).join('');
     
     updateDrawingsPagination();
 }
@@ -167,7 +162,7 @@ function updateDrawingsPagination() {
     
     let buttons = '<div class="pagination">';
     for(let i = 1; i <= totalPages; i++) {
-        buttons += `<button onclick="goToDrawingsPage(${i})" ${i === currentDrawingsPage ? 'style="background:#00d4ff;"' : ''}>${i}</button>`;
+        buttons += `<button onclick="goToDrawingsPage(${i})" ${i === currentDrawingsPage ? 'style="background:#00d4ff;color:black;"' : ''}>${i}</button>`;
     }
     buttons += '</div>';
     paginationDiv.innerHTML = buttons;
@@ -194,7 +189,7 @@ async function loadKeychains() {
     } catch(error) {
         console.error("Error loading keychains:", error);
         const container = document.getElementById("keychainsContainer");
-        if(container) container.innerHTML = "<p>Error loading keychains. Please try again.</p>";
+        if(container) container.innerHTML = "<p style='text-align:center;color:red;'>Error loading keychains. Please make sure keychains.json exists.</p>";
     }
 }
 
@@ -202,25 +197,32 @@ function renderKeychains() {
     const container = document.getElementById("keychainsContainer");
     if(!container) return;
     
+    if(allKeychains.length === 0) {
+        container.innerHTML = "<p style='text-align:center;'>No keychains available.</p>";
+        return;
+    }
+    
     const start = (currentKeychainsPage - 1) * keychainsPerPage;
     const end = start + keychainsPerPage;
     const pageKeychains = allKeychains.slice(start, end);
     
-    if(pageKeychains.length === 0) {
-        container.innerHTML = "<p style='text-align:center;'>No keychains available.</p>";
-        updateKeychainsPagination();
-        return;
-    }
-    
     container.innerHTML = pageKeychains.map(keychain => {
         const originalPrice = keychain.price;
-        const totalDiscount = getTotalDiscount('keychain');
-        const discountedPrice = totalDiscount > 0 ? Math.floor(originalPrice * (1 - totalDiscount)) : originalPrice;
+        const discount = getTotalDiscount('keychain');
+        const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+        const discountPercent = Math.floor(discount * 100);
+        const discountHtml = discount > 0 ? `<span style="color:#00ff88; font-size:12px;"> (${discountPercent}% OFF! Was ₹${originalPrice})</span>` : '';
         
-        let discountText = "";
-        if(totalDiscount > 0) {
-            const discountPercent = Math.floor(totalDiscount * 100);
-            discountText = `<span style="color:#00ff88; font-size:14px;"> (${discountPercent}% OFF! Was ₹${originalPrice})</span>`;
+        if(keychain.sold) {
+            return `
+            <div class="card">
+                <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
+                <h3>${keychain.name}</h3>
+                <p>${keychain.description}</p>
+                <p><strong style="color:#ff4444;">₹${discountedPrice}</strong>${discountHtml}</p>
+                <p style="font-size:12px;">${keychain.deliveryIncluded ? '✓ Delivery included' : '+ delivery extra'}</p>
+                <div class="sold-badge">SOLD OUT</div>
+            </div>`;
         }
         
         return `
@@ -228,17 +230,15 @@ function renderKeychains() {
             <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
             <h3>${keychain.name}</h3>
             <p>${keychain.description}</p>
-            <p><strong style="color:#00ff88;">🔥 Price: ₹${discountedPrice}</strong>${discountText}</p>
+            <p><strong style="color:#00ff88;">₹${discountedPrice}</strong>${discountHtml}</p>
             <p style="font-size:12px;">${keychain.deliveryIncluded ? '✓ Delivery included' : '+ delivery extra'}</p>
-            ${keychain.sold ? '<div class="sold-badge">SOLD OUT</div>' : `
-                <div class="buttons">
-                    <button onclick="addWishlist('${keychain.name}')">❤️ Wishlist</button>
-                    <button onclick="addCart('${keychain.name}', ${discountedPrice})">🛒 Cart</button>
-                    <button onclick="buyNow('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})">💳 Buy Now</button>
-                </div>
-            `}
-        </div>
-    `}).join('');
+            <div class="buttons">
+                <button onclick="addWishlist('${keychain.name}')">❤️ Wishlist</button>
+                <button onclick="addCart('${keychain.name}', ${discountedPrice})">🛒 Cart</button>
+                <button onclick="buyNow('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})">💳 Buy Now</button>
+            </div>
+        </div>`;
+    }).join('');
     
     updateKeychainsPagination();
 }
@@ -255,7 +255,7 @@ function updateKeychainsPagination() {
     
     let buttons = '<div class="pagination">';
     for(let i = 1; i <= totalPages; i++) {
-        buttons += `<button onclick="goToKeychainsPage(${i})" ${i === currentKeychainsPage ? 'style="background:#00d4ff;"' : ''}>${i}</button>`;
+        buttons += `<button onclick="goToKeychainsPage(${i})" ${i === currentKeychainsPage ? 'style="background:#00d4ff;color:black;"' : ''}>${i}</button>`;
     }
     buttons += '</div>';
     paginationDiv.innerHTML = buttons;
@@ -268,7 +268,7 @@ function goToKeychainsPage(page) {
 }
 
 // ===========================
-// WISHLIST
+// WISHLIST & CART FUNCTIONS
 // ===========================
 function addWishlist(product) {
     if(wishlist.includes(product)) {
@@ -278,21 +278,18 @@ function addWishlist(product) {
     wishlist.push(product);
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
     updateCounters();
-    alert(product + " added to wishlist!");
+    alert("❤️ " + product + " added to wishlist!");
 }
 
-// ===========================
-// CART
-// ===========================
 function addCart(product, price) {
-    cart.push({ product, price });
+    cart.push({ product, price, date: new Date().toLocaleString() });
     localStorage.setItem("cart", JSON.stringify(cart));
     updateCounters();
-    alert(product + " added to cart! (₹" + price + ")");
+    alert("🛒 " + product + " added to cart! (₹" + price + ")");
 }
 
 // ===========================
-// BUY NOW
+// BUY NOW - GLOBAL VARIABLES
 // ===========================
 let currentOrderType = null;
 let currentOrderId = null;
@@ -311,6 +308,8 @@ function buyNow(product, price, type, id) {
         popup.style.display = "block";
         const fileInput = document.getElementById("paymentScreenshot");
         if(fileInput) fileInput.value = "";
+    } else {
+        alert("Payment system error. Please contact support.");
     }
 }
 
@@ -324,16 +323,13 @@ if(closeBtn) {
     });
 }
 
-// ===========================
-// CLICK OUTSIDE POPUP
-// ===========================
 window.addEventListener("click", (e) => {
     const popup = document.getElementById("paymentPopup");
     if(e.target === popup) popup.style.display = "none";
 });
 
 // ===========================
-// COMMISSION PRICE
+// COMMISSION PRICE CALCULATION
 // ===========================
 const sheetSize = document.getElementById("sheetSize");
 const medium = document.getElementById("medium");
@@ -344,9 +340,9 @@ function calculateCommission() {
         const sizePrice = parseInt(sheetSize.value) || 0;
         const mediumPrice = parseInt(medium.value) || 0;
         let total = sizePrice + mediumPrice;
-        const totalDiscount = getTotalDiscount('commission');
-        if(totalDiscount > 0) {
-            total = Math.floor(total * (1 - totalDiscount));
+        const discount = getTotalDiscount('commission');
+        if(discount > 0) {
+            total = Math.floor(total * (1 - discount));
         }
         commissionPrice.innerText = "Total : ₹" + total;
     }
@@ -359,34 +355,60 @@ if(sheetSize && medium && commissionPrice) {
 }
 
 // ===========================
-// COMMISSION ORDER
+// COMMISSION ORDER (with reference image mandatory)
 // ===========================
 function commissionOrder() {
+    // Get all form values
+    const fullName = document.getElementById('commissionName')?.value.trim() || "";
+    const email = document.getElementById('commissionEmail')?.value.trim() || "";
+    const address = document.getElementById('commissionAddress')?.value.trim() || "";
+    const city = document.getElementById('commissionCity')?.value.trim() || "";
+    const pincode = document.getElementById('commissionPincode')?.value.trim() || "";
+    const phone = document.getElementById('commissionPhone')?.value.trim() || "";
+    const referenceDesc = document.getElementById('commissionReference')?.value.trim() || "";
+    
+    // Validation - Reference Image Description is MANDATORY
+    if(!fullName) {
+        alert("❌ Please enter your full name.");
+        return;
+    }
+    if(!email) {
+        alert("❌ Please enter your email address.");
+        return;
+    }
+    if(!address) {
+        alert("❌ Please enter your complete address.");
+        return;
+    }
+    if(!city) {
+        alert("❌ Please enter your city.");
+        return;
+    }
+    if(!pincode) {
+        alert("❌ Please enter your pincode.");
+        return;
+    }
+    if(!phone) {
+        alert("❌ Please enter your phone number.");
+        return;
+    }
+    if(!referenceDesc) {
+        alert("❌ REFERENCE IMAGE DESCRIPTION IS MANDATORY! Please describe what you want me to draw. (Character, pose, background, etc.)");
+        return;
+    }
+    
     const sizePrice = parseInt(sheetSize?.value) || 0;
     const mediumPrice = parseInt(medium?.value) || 0;
     let total = sizePrice + mediumPrice;
-    const totalDiscount = getTotalDiscount('commission');
-    const discountPercent = Math.floor(totalDiscount * 100);
+    const discount = getTotalDiscount('commission');
+    const discountPercent = Math.floor(discount * 100);
     
-    if(totalDiscount > 0) {
-        total = Math.floor(total * (1 - totalDiscount));
+    if(discount > 0) {
+        total = Math.floor(total * (1 - discount));
     }
     
-    // Get form values
-    const fullName = document.getElementById('commissionName')?.value || "";
-    const address = document.getElementById('commissionAddress')?.value || "";
-    const city = document.getElementById('commissionCity')?.value || "";
-    const pincode = document.getElementById('commissionPincode')?.value || "";
-    const phone = document.getElementById('commissionPhone')?.value || "";
-    const email = document.getElementById('commissionEmail')?.value || "";
-    const referenceDesc = document.getElementById('commissionReference')?.value || "";
     const sheetSizeText = sheetSize?.options[sheetSize.selectedIndex]?.text || "";
     const mediumText = medium?.options[medium.selectedIndex]?.text || "";
-    
-    if(!fullName || !address || !city || !pincode || !phone || !email || !referenceDesc) {
-        alert("Please fill all commission form fields including reference image description and email.");
-        return;
-    }
     
     currentCustomerEmail = email;
     currentOrderType = "commission";
@@ -394,9 +416,10 @@ function commissionOrder() {
     currentOrderPrice = total;
     currentOrderId = Date.now();
     
-    // Store commission details for email
     window.commissionDetails = {
-        fullName, address, city, pincode, phone, email, referenceDesc, sheetSizeText, mediumText, discountPercent
+        fullName, address, city, pincode, phone, email, 
+        referenceDesc, sheetSizeText, mediumText, 
+        discountPercent, isMonthlyOffer: isMonthlyOfferDay()
     };
     
     const popup = document.getElementById("paymentPopup");
@@ -416,53 +439,75 @@ if(submitBtn) {
         const screenshot = document.getElementById("paymentScreenshot");
         
         if(!screenshot || screenshot.files.length === 0) {
-            alert("Please upload payment screenshot first.");
+            alert("📸 Please upload payment screenshot first.");
             return;
         }
         
-        // Build email details
         let emailMessage = "";
         let emailSubject = "";
         
         if(currentOrderType === "commission") {
-            emailSubject = `NEW COMMISSION ORDER - ${currentOrderName}`;
+            emailSubject = `🎨 NEW COMMISSION ORDER - ${currentOrderName}`;
             emailMessage = `
-                ORDER TYPE: Commission
-                Order ID: ${currentOrderId}
-                Customer: ${window.commissionDetails?.fullName || "N/A"}
-                Email: ${window.commissionDetails?.email || "N/A"}
-                Address: ${window.commissionDetails?.address || "N/A"}, ${window.commissionDetails?.city || "N/A"} - ${window.commissionDetails?.pincode || "N/A"}
-                Phone: ${window.commissionDetails?.phone || "N/A"}
-                Details: ${window.commissionDetails?.mediumText || "N/A"} on ${window.commissionDetails?.sheetSizeText || "N/A"}
-                Reference Image Description: ${window.commissionDetails?.referenceDesc || "N/A"}
-                Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
-                Total Price: ₹${currentOrderPrice}
-                Order Date: ${new Date().toLocaleString()}
+╔═══════════════════════════════════════╗
+║        NEW COMMISSION ORDER           ║
+╠═══════════════════════════════════════╣
+║ Order ID: ${currentOrderId}
+║ Order Date: ${new Date().toLocaleString()}
+║
+║ 👤 CUSTOMER DETAILS:
+║ Name: ${window.commissionDetails?.fullName || "N/A"}
+║ Email: ${window.commissionDetails?.email || "N/A"}
+║ Phone: ${window.commissionDetails?.phone || "N/A"}
+║ Address: ${window.commissionDetails?.address || "N/A"}
+║ City: ${window.commissionDetails?.city || "N/A"}
+║ Pincode: ${window.commissionDetails?.pincode || "N/A"}
+║
+║ 🎨 COMMISSION DETAILS:
+║ Size: ${window.commissionDetails?.sheetSizeText || "N/A"}
+║ Medium: ${window.commissionDetails?.mediumText || "N/A"}
+║
+║ 🖼️ REFERENCE IMAGE DESCRIPTION (MANDATORY):
+║ ${window.commissionDetails?.referenceDesc || "N/A"}
+║
+║ 💰 PRICE DETAILS:
+║ Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
+║ Monthly Offer Applied: ${window.commissionDetails?.isMonthlyOffer ? "YES (10%)" : "NO"}
+║ Total Price: ₹${currentOrderPrice}
+║
+║ 📎 Payment screenshot attached separately.
+╚═══════════════════════════════════════╝
             `;
             markCommissionBuyer(window.commissionDetails?.email);
         } else {
-            const totalDiscount = getTotalDiscount(currentOrderType);
-            const discountPercent = Math.floor(totalDiscount * 100);
-            emailSubject = `NEW ORDER - ${currentOrderName}`;
+            const discount = getTotalDiscount(currentOrderType);
+            const discountPercent = Math.floor(discount * 100);
+            emailSubject = `🛍️ NEW ORDER - ${currentOrderName}`;
             emailMessage = `
-                ORDER TYPE: ${currentOrderType?.toUpperCase() || "PRODUCT"}
-                Product: ${currentOrderName}
-                Product ID: ${currentOrderId}
-                Original Price: ₹${Math.floor(currentOrderPrice / (1 - totalDiscount)) || currentOrderPrice}
-                Discount Applied: ${discountPercent}% OFF
-                Total Price: ₹${currentOrderPrice}
-                Order Date: ${new Date().toLocaleString()}
+╔═══════════════════════════════════════╗
+║           NEW PRODUCT ORDER           ║
+╠═══════════════════════════════════════╣
+║ Order ID: ${currentOrderId}
+║ Order Date: ${new Date().toLocaleString()}
+║
+║ 📦 PRODUCT DETAILS:
+║ Type: ${currentOrderType?.toUpperCase() || "PRODUCT"}
+║ Name: ${currentOrderName}
+║ Product ID: ${currentOrderId}
+║
+║ 💰 PRICE DETAILS:
+║ Final Price: ₹${currentOrderPrice}
+║ Discount Applied: ${discountPercent}% OFF
+║ Monthly Offer: ${isMonthlyOfferDay() ? "YES (10%)" : "NO"}
+║
+║ 📎 Payment screenshot attached separately.
+╚═══════════════════════════════════════╝
             `;
             if(currentOrderType === 'drawing') {
                 markDrawingBuyer(currentCustomerEmail || 'customer@example.com');
             } else if(currentOrderType === 'keychain') {
                 markKeychainBuyer(currentCustomerEmail || 'customer@example.com');
             }
-        }
-        
-        // Add monthly offer info to email
-        if(isMonthlyOfferDay()) {
-            emailMessage += `\n\n🎉 MONTHLY SPECIAL: 10% OFF applied (1st Day Offer) 🎉`;
         }
         
         emailjs.send(
@@ -480,10 +525,9 @@ if(submitBtn) {
             }
         )
         .then(function() {
-            alert("✅ Order submitted successfully! We'll contact you within 24 hours via email/Instagram.");
+            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\nWe'll contact you within 24 hours via email/Instagram.\n\n📧 Check your email for confirmation.");
             document.getElementById("paymentPopup").style.display = "none";
             
-            // Reset order data
             currentOrderType = null;
             currentOrderId = null;
             currentOrderPrice = null;
@@ -491,24 +535,116 @@ if(submitBtn) {
             currentCustomerEmail = null;
             window.commissionDetails = null;
             
-            // Clear file input
             if(screenshot) screenshot.value = "";
         })
         .catch(function(error) {
             console.error("Email error:", error);
-            alert("❌ Order received but notification failed. Please DM on Instagram @kanishkv_456 with your screenshot.");
+            alert("❌ Order received but notification failed.\n\nPlease DM your screenshot on Instagram @kanishkv_456\n\nWe will process your order manually.");
+            document.getElementById("paymentPopup").style.display = "none";
         });
     });
 }
 
 // ===========================
-// UPDATE OFFER BANNER ON ALL PAGES
+// HOMEPAGE PRODUCTS WITH BUY NOW
+// ===========================
+async function loadHomeProducts() {
+    try {
+        const drawingsRes = await fetch('data/drawings.json');
+        const drawings = await drawingsRes.json();
+        const first6Drawings = drawings.slice(0, 6);
+        
+        const drawingsGrid = document.getElementById('homeDrawingsGrid');
+        if(drawingsGrid) {
+            drawingsGrid.innerHTML = first6Drawings.map(drawing => {
+                const originalPrice = drawing.price + drawing.delivery;
+                const discount = getTotalDiscount('drawing');
+                const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+                const discountPercent = Math.floor(discount * 100);
+                const discountHtml = discount > 0 ? `<span style="color:#00ff88;"> (${discountPercent}% OFF)</span>` : '';
+                
+                if(drawing.sold) {
+                    return `
+                    <div class="card">
+                        <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
+                        <h3>${drawing.name}</h3>
+                        <p>${drawing.description}</p>
+                        <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                        <div class="sold-badge">SOLD OUT</div>
+                    </div>`;
+                }
+                
+                return `
+                <div class="card">
+                    <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
+                    <h3>${drawing.name}</h3>
+                    <p>${drawing.description}</p>
+                    <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                    <div class="buttons" style="padding:10px;">
+                        <button onclick="addWishlist('${drawing.name}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
+                        <button onclick="addCart('${drawing.name}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
+                        <button onclick="buyNow('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        const keychainsRes = await fetch('data/keychains.json');
+        const keychains = await keychainsRes.json();
+        const first6Keychains = keychains.slice(0, 6);
+        
+        const keychainsGrid = document.getElementById('homeKeychainsGrid');
+        if(keychainsGrid) {
+            keychainsGrid.innerHTML = first6Keychains.map(keychain => {
+                const originalPrice = keychain.price;
+                const discount = getTotalDiscount('keychain');
+                const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+                const discountPercent = Math.floor(discount * 100);
+                const discountHtml = discount > 0 ? `<span style="color:#00ff88;"> (${discountPercent}% OFF)</span>` : '';
+                
+                if(keychain.sold) {
+                    return `
+                    <div class="card">
+                        <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
+                        <h3>${keychain.name}</h3>
+                        <p>${keychain.description}</p>
+                        <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                        <div class="sold-badge">SOLD OUT</div>
+                    </div>`;
+                }
+                
+                return `
+                <div class="card">
+                    <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
+                    <h3>${keychain.name}</h3>
+                    <p>${keychain.description}</p>
+                    <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                    <div class="buttons" style="padding:10px;">
+                        <button onclick="addWishlist('${keychain.name}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
+                        <button onclick="addCart('${keychain.name}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
+                        <button onclick="buyNow('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    } catch(error) {
+        console.error("Error loading home products:", error);
+    }
+}
+
+// ===========================
+// UPDATE OFFER BANNER
 // ===========================
 function updateOfferBanner() {
-    const banners = document.querySelectorAll('.offer-banner');
-    banners.forEach(banner => {
-        if(banner) {
-            banner.innerHTML = getOfferBannerText();
+    const isFirstDay = isMonthlyOfferDay();
+    const bannerSpans = document.querySelectorAll('#offerBannerText');
+    bannerSpans.forEach(span => {
+        if(span) {
+            if(isFirstDay) {
+                span.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
+            } else {
+                span.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
+            }
         }
     });
 }
@@ -518,8 +654,6 @@ function updateOfferBanner() {
 // ===========================
 const container = document.getElementById("floatingContainer");
 let rotation = 0;
-
-// Touch Swipe
 let touchStartY = 0;
 let touchEndY = 0;
 
@@ -529,10 +663,6 @@ document.addEventListener("touchstart", (e) => {
 
 document.addEventListener("touchend", (e) => {
     touchEndY = e.changedTouches[0].screenY;
-    handleSwipe();
-});
-
-function handleSwipe() {
     if(container) {
         if(touchStartY - touchEndY > 50) {
             rotation += 30;
@@ -542,9 +672,8 @@ function handleSwipe() {
             container.style.transform = `rotate(${rotation}deg)`;
         }
     }
-}
+});
 
-// Mouse Wheel Support
 window.addEventListener("wheel", (e) => {
     if(container) {
         if(e.deltaY < 0) rotation += 15;
@@ -554,7 +683,7 @@ window.addEventListener("wheel", (e) => {
 });
 
 // ===========================
-// AUTO SAVE & INIT
+// AUTO SAVE & INITIALIZATION
 // ===========================
 window.addEventListener("beforeunload", () => {
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -562,14 +691,12 @@ window.addEventListener("beforeunload", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Load products based on current page
     if(document.getElementById("drawingsContainer")) loadDrawings();
     if(document.getElementById("keychainsContainer")) loadKeychains();
+    if(document.getElementById("homeDrawingsGrid")) loadHomeProducts();
     
-    // Update offer banners
     updateOfferBanner();
     
-    // Video autoplay
     const video = document.getElementById("bgVideo");
     if(video) {
         video.muted = true;
