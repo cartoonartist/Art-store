@@ -319,6 +319,22 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Autoplay blocked:", error);
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+
+    const video =
+    document.getElementById("bgVideo");
+
+    video.muted = true;
+
+    video.play()
+    .then(() => {
+        console.log("Video playing");
+    })
+    .catch(err => {
+        console.log(err);
+    });
+
+});
 function getDrawingPrice(groupName){
 
     const selected =
