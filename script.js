@@ -107,6 +107,63 @@ window.addEventListener("click", (e) => {
     }
 });
 
+const bgVideo =
+document.getElementById("bgVideo");
+
+let playingForward = true;
+
+bgVideo.play();
+
+bgVideo.addEventListener(
+"ended",
+function(){
+
+    if(playingForward){
+
+        playingForward = false;
+
+        bgVideo.playbackRate = -1;
+
+        bgVideo.currentTime =
+        bgVideo.duration - 0.05;
+
+        reverseVideo();
+
+    }else{
+
+        playingForward = true;
+
+        bgVideo.playbackRate = 1;
+
+        bgVideo.currentTime = 0;
+
+        bgVideo.play();
+    }
+}
+);
+
+function reverseVideo(){
+
+    const reverseInterval =
+    setInterval(function(){
+
+        if(bgVideo.currentTime <= 0.1){
+
+            clearInterval(
+            reverseInterval
+            );
+
+            playingForward = true;
+
+            bgVideo.playbackRate = 1;
+
+            bgVideo.currentTime = 0;
+
+            bgVideo.play();
+        }
+
+    },30);
+}
 // ===========================
 // COMMISSION PRICE
 // ===========================
