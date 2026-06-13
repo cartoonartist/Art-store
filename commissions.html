@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commission Artwork | Kanishk Art Store</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>
         emailjs.init("2XhNwiYxl5KZMK4d0");
@@ -18,18 +19,44 @@
             <li><a href="drawings.html">Drawings</a></li>
             <li><a href="keychains.html">Keychains</a></li>
             <li><a href="commissions.html">Commission</a></li>
+            <li>
+                <a href="#">
+                    Wishlist
+                    <span id="wishlistCount">0</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    Cart
+                    <span id="cartCount">0</span>
+                </a>
+            </li>
         </ul>
     </nav>
+
+    <!-- Offer Banner -->
+    <div class="offer-banner" style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 12px; text-align: center; color: white; font-weight: bold;">
+        <span id="offerBannerText">Loading offers...</span>
+    </div>
 
     <section class="section">
         <h2 class="section-title">COMMISSION ARTWORK</h2>
         
+        <!-- Offer Banner -->
+        <div style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 15px; border-radius: 15px; text-align: center; margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;">
+            <p style="color: white; font-weight: bold; margin: 0;">🎉 FIRST 10 CUSTOMERS GET 40% OFF ON FIRST ORDER! 🎉</p>
+            <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">Limited slots available - Order now!</p>
+        </div>
+        
         <form id="commissionForm">
             <input type="text" id="commissionName" placeholder="Full Name" required>
+            <input type="email" id="commissionEmail" placeholder="Email Address (for order updates)" required>
             <textarea id="commissionAddress" placeholder="Complete Address (with house number, street, landmark)" required></textarea>
             <input type="text" id="commissionCity" placeholder="City" required>
             <input type="number" id="commissionPincode" placeholder="Pincode" required>
             <input type="tel" id="commissionPhone" placeholder="Phone Number (with country code)" required>
+            
+            <textarea id="commissionReference" placeholder="Describe your reference image in detail (What character/scene/style do you want? Any specific pose, background, or elements?)" required style="min-height: 100px;"></textarea>
             
             <label style="text-align:left; margin-top:10px;">Select Size:</label>
             <select id="sheetSize">
@@ -46,6 +73,8 @@
             </select>
             
             <h3 id="commissionPrice">Total : ₹350</h3>
+            <p style="font-size: 12px; color: #00ff88; text-align: center;">✨ 40% discount automatically applied for first 10 customers!</p>
+            <p style="font-size: 12px; color: #ffcc00; text-align: center;">🎁 On 1st of every month: Extra 10% OFF!</p>
             
             <button type="button" onclick="commissionOrder()">Order Commission</button>
         </form>
@@ -57,7 +86,7 @@
             <span id="closePopup">&times;</span>
             <h2>Complete Payment</h2>
             <img src="images/QR.jpg" alt="QR Code" class="qr">
-            <p>Scan QR code & pay the exact amount</p>
+            <p>Scan QR code & pay the exact amount shown above</p>
             <input type="file" id="paymentScreenshot" accept="image/*" required>
             <button id="submitPayment">Submit Payment Proof</button>
         </div>
@@ -69,6 +98,21 @@
         <p>Instagram : @kanishkv_456</p>
     </footer>
 
+    <script>
+        function updateOfferBanner() {
+            const today = new Date();
+            const isFirstDay = today.getDate() === 1;
+            const bannerSpan = document.getElementById('offerBannerText');
+            if(bannerSpan) {
+                if(isFirstDay) {
+                    bannerSpan.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
+                } else {
+                    bannerSpan.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateOfferBanner);
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
