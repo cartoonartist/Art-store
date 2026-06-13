@@ -198,11 +198,6 @@ submitBtn.addEventListener("click", function(){
     .style.display = "none";
 });
 
-    document
-    .getElementById("paymentPopup")
-    .style.display = "none";
-}
-);
 
 // ===========================
 // FLOATING ART ROTATION
@@ -255,7 +250,6 @@ function handleSwipe(){
 
         container.style.transform =
         `rotate(${rotation}deg)`;
-        rotateGalaxy(true);
     }
 
     // Swipe Down
@@ -268,7 +262,6 @@ function handleSwipe(){
 
         container.style.transform =
         `rotate(${rotation}deg)`;
-        rotateGalaxy(false);
     }
 }
 
@@ -313,27 +306,23 @@ window.addEventListener(
     );
 });
 document.addEventListener("DOMContentLoaded", () => {
-    const video = document.getElementById("bgVideo");
-
-    video.play().catch(error => {
-        console.log("Autoplay blocked:", error);
-    });
-});
-document.addEventListener("DOMContentLoaded", () => {
 
     const video =
     document.getElementById("bgVideo");
 
-    video.muted = true;
+    if(video){
 
-    video.play()
-    .then(() => {
-        console.log("Video playing");
-    })
-    .catch(err => {
-        console.log(err);
-    });
+        video.muted = true;
 
+        video.play()
+        .catch(error => {
+
+            console.log(
+            "Video autoplay blocked:",
+            error
+            );
+        });
+    }
 });
 function getDrawingPrice(groupName){
 
