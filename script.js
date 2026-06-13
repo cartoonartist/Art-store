@@ -312,29 +312,7 @@ window.addEventListener(
     JSON.stringify(wishlist)
     );
 });
-const bgVideo =
-document.getElementById("bgVideo");
 
-let forward = true;
-
-bgVideo.addEventListener("ended", () => {
-
-    if(forward){
-
-        bgVideo.src =
-        "videos/galaxy_reverse.mp4";
-
-    }else{
-
-        bgVideo.src =
-        "videos/galaxy.mp4";
-    }
-
-    forward = !forward;
-
-    bgVideo.load();
-    bgVideo.play();
-});
 function getDrawingPrice(groupName){
 
     const selected =
