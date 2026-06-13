@@ -34,6 +34,26 @@
         <div id="drawingsPagination"></div>
     </section>
 
+    <!-- DELIVERY DETAILS POPUP -->
+    <div id="deliveryPopup" class="popup">
+        <div class="popup-content" style="max-width: 500px;">
+            <span id="closeDeliveryPopup">&times;</span>
+            <h2>📦 Delivery Details</h2>
+            <p style="color: #00d4ff; font-size: 14px; margin-bottom: 15px;">Please fill in your shipping information</p>
+            
+            <input type="text" id="deliveryName" placeholder="Full Name *" required style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white;">
+            <input type="email" id="deliveryEmail" placeholder="Email Address *" required style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white;">
+            <input type="text" id="deliveryCity" placeholder="City *" required style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white;">
+            <input type="text" id="deliveryPincode" placeholder="Pincode * (6 digits)" required maxlength="6" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white;">
+            <textarea id="deliveryAddress" placeholder="Complete Address * (House No., Street, Landmark)" required style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white; min-height:80px;"></textarea>
+            <input type="text" id="deliveryState" placeholder="State *" required style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white;">
+            <input type="tel" id="deliveryPhone" placeholder="Phone Number * (10 digits)" required maxlength="10" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:none; background:#222; color:white;">
+            
+            <button onclick="submitDeliveryDetails()" style="width:100%; padding:12px; background:#00d4ff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;">Proceed to Payment</button>
+        </div>
+    </div>
+
+    <!-- PAYMENT POPUP -->
     <div id="paymentPopup" class="popup">
         <div class="popup-content">
             <span id="closePopup">&times;</span>
