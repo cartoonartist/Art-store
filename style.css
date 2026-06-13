@@ -434,6 +434,38 @@ footer{
 
     background:#00ffcc;
 }
+.sold-badge{
+    background:#ff3b3b;
+    color:white;
+    padding:6px 12px;
+    border-radius:8px;
+    display:inline-block;
+    margin:10px;
+    font-weight:bold;
+}
+
+.available-badge{
+    background:#00ff88;
+    color:black;
+    padding:6px 12px;
+    border-radius:8px;
+    display:inline-block;
+    margin:10px;
+    font-weight:bold;
+}
+
+.pagination{
+    text-align:center;
+    margin-top:40px;
+}
+
+.pagination button{
+    margin:5px;
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
 
 /* Responsive */
 
