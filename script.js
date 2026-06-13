@@ -189,13 +189,50 @@ submitBtn.addEventListener("click", function(){
         return;
     }
 
+    const popup =
+document.getElementById("paymentPopup");
+
+emailjs.send(
+"service_t2hgt6w",
+"template_9q28bu6",
+{
+product_name:
+popup.getAttribute("data-product"),
+
+product_id:
+popup.getAttribute("data-product"),
+
+sale_date:
+new Date().toLocaleString(),
+
+frame_type:
+"Selected Option",
+
+total_price:
+popup.getAttribute("data-price"),
+
+commission_details:
+"Not a commission order"
+}
+)
+.then(function(){
+
     alert(
-    "Payment proof submitted successfully!"
+    "Order submitted successfully!"
     );
 
     document
     .getElementById("paymentPopup")
     .style.display = "none";
+
+})
+.catch(function(error){
+
+    console.error(error);
+
+    alert(
+    "Email notification failed."
+    );
 });
 
 
