@@ -312,7 +312,13 @@ window.addEventListener(
     JSON.stringify(wishlist)
     );
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const video = document.getElementById("bgVideo");
 
+    video.play().catch(error => {
+        console.log("Autoplay blocked:", error);
+    });
+});
 function getDrawingPrice(groupName){
 
     const selected =
