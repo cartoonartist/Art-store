@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "name": "Demon Slayer Keychain",
+    "image": "images/keychains/key1.jpg",
+    "description": "Anime acrylic keychain",
+    "price": 150,
+    "deliveryIncluded": true,
+    "sold": false
+  },
+
+  {
+    "id": 2,
+    "name": "Gojo Keychain",
+    "image": "images/keychains/key2.jpg",
+    "description": "Custom anime keychain",
+    "price": 150,
+    "deliveryIncluded": true,
+    "sold": true
+  },
+
+  {
+    "id": 3,
+    "name": "Naruto Keychain",
+    "image": "images/keychains/key3.jpg",
+    "description": "Handmade anime keychain",
+    "price": 150,
+    "deliveryIncluded": true,
+    "sold": false
+  }
+]
