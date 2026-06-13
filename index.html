@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Kanishk Art Store</title>
-
     <link rel="stylesheet" href="style.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
     
@@ -19,149 +15,176 @@
 </video>
 
 <div id="videoOverlay"></div>
-    
 
     <!-- Floating Art Supplies -->
     <div id="floatingContainer">
-
         <div class="floating-item">🎨</div>
         <div class="floating-item">✏️</div>
         <div class="floating-item">🖌️</div>
         <div class="floating-item">📏</div>
         <div class="floating-item">🖍️</div>
         <div class="floating-item">✂️</div>
-
     </div>
 
     <!-- Navbar -->
-
     <nav>
-
         <div class="logo">
             KANISHK ART STORE
         </div>
-
         <ul>
-
             <li><a href="#home">Home</a></li>
-
             <li><a href="drawings.html">Drawings</a></li>
-
             <li><a href="keychains.html">Keychains</a></li>
-
             <li><a href="commissions.html">Commission</a></li>
-
             <li>
                 <a href="#">
                     Wishlist
                     <span id="wishlistCount">0</span>
                 </a>
             </li>
-
             <li>
                 <a href="#">
                     Cart
                     <span id="cartCount">0</span>
                 </a>
             </li>
-
         </ul>
-
     </nav>
 
+    <!-- Offer Banner -->
+    <div class="offer-banner" style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 12px; text-align: center; color: white; font-weight: bold;">
+        <span id="offerBannerText">Loading offers...</span>
+    </div>
+
     <!-- Hero Section -->
-
     <section id="home" class="hero">
-
         <h1>WELCOME TO MY ART WORLD</h1>
-
         <p>
             Handmade Drawings • Custom Commission Artwork • Keychains
         </p>
-
         <a href="drawings.html" class="hero-btn">
             Explore Collection
         </a>
-
     </section>
 
     <!-- Instagram -->
-
     <section class="instagram-box">
-
         <h2>CONTACT ME ON INSTAGRAM</h2>
-
         <p>
             YOU CAN DM / COMMENT ME ON INSTAGRAM
         </p>
-
         <h3>@kanishkv_456</h3>
-
     </section>
 
-    <!-- DRAWINGS SECTION -->
+    <!-- DRAWINGS PREVIEW SECTION ON HOMEPAGE -->
+    <section class="home-product-section">
+        <h2 class="section-title">🔥 FEATURED DRAWINGS <span style="font-size: 18px;">(20% OFF for first 20 customers!)</span></h2>
+        <div class="home-product-grid" id="homeDrawingsGrid">
+            <!-- Will be loaded by JavaScript -->
+        </div>
+        <div class="view-all-btn">
+            <a href="drawings.html">View All Drawings →</a>
+        </div>
+    </section>
 
-    
+    <!-- KEYCHAINS PREVIEW SECTION ON HOMEPAGE -->
+    <section class="home-product-section">
+        <h2 class="section-title">🔑 FEATURED KEYCHAINS <span style="font-size: 18px;">(20% OFF for first 20 customers!)</span></h2>
+        <div class="home-product-grid" id="homeKeychainsGrid">
+            <!-- Will be loaded by JavaScript -->
+        </div>
+        <div class="view-all-btn">
+            <a href="keychains.html">View All Keychains →</a>
+        </div>
+    </section>
 
-    <!-- KEYCHAIN SECTION -->
-
-    
-
-    
     <!-- PAYMENT POPUP -->
-
     <div id="paymentPopup" class="popup">
-
-    <div class="popup-content">
-
-        <span id="closePopup">&times;</span>
-
-        <h2>Complete Payment</h2>
-
-        <img
-            src="images/QR.jpg"
-            alt="QR Code"
-            class="qr"
-        >
-
-        <input
-            type="file"
-            id="paymentScreenshot"
-            accept="image/*"
-            required
-        >
-
-        <button id="submitPayment">
-            Submit Payment Proof
-        </button>
-
+        <div class="popup-content">
+            <span id="closePopup">&times;</span>
+            <h2>Complete Payment</h2>
+            <img src="images/QR.jpg" alt="QR Code" class="qr">
+            <input type="file" id="paymentScreenshot" accept="image/*" required>
+            <button id="submitPayment">Submit Payment Proof</button>
+        </div>
     </div>
-
-    </div>
-        
 
     <!-- Footer -->
-
     <footer>
-
-        <h3>
-            Kanishk Art Store
-        </h3>
-
-        <p>
-            Handmade Art • Custom Artwork • Keychains
-        </p>
-
-        <p>
-            Instagram : @kanishkv_456
-        </p>
-
+        <h3>Kanishk Art Store</h3>
+        <p>Handmade Art • Custom Artwork • Keychains</p>
+        <p>Instagram : @kanishkv_456</p>
     </footer>
-
-    
 
 <script>
 emailjs.init("2XhNwiYxl5KZMK4d0");
+</script>
+
+<script>
+// Load homepage preview products
+async function loadHomeProducts() {
+    try {
+        // Load drawings
+        const drawingsRes = await fetch('data/drawings.json');
+        const drawings = await drawingsRes.json();
+        const first6Drawings = drawings.slice(0, 6);
+        
+        const drawingsGrid = document.getElementById('homeDrawingsGrid');
+        if(drawingsGrid) {
+            drawingsGrid.innerHTML = first6Drawings.map(drawing => {
+                const originalPrice = drawing.price + drawing.delivery;
+                return `
+                <div class="card">
+                    <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
+                    <h3>${drawing.name}</h3>
+                    <p>${drawing.description}</p>
+                    <p><strong>₹${originalPrice}</strong></p>
+                    <div class="offer-badge">10% OFF</div>
+                </div>
+            `}).join('');
+        }
+        
+        // Load keychains
+        const keychainsRes = await fetch('data/keychains.json');
+        const keychains = await keychainsRes.json();
+        const first6Keychains = keychains.slice(0, 6);
+        
+        const keychainsGrid = document.getElementById('homeKeychainsGrid');
+        if(keychainsGrid) {
+            keychainsGrid.innerHTML = first6Keychains.map(keychain => {
+                return `
+                <div class="card">
+                    <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
+                    <h3>${keychain.name}</h3>
+                    <p>${keychain.description}</p>
+                    <p><strong>₹${keychain.price}</strong></p>
+                    <div class="offer-badge">10% OFF</div>
+                </div>
+            `}).join('');
+        }
+    } catch(error) {
+        console.error("Error loading home products:", error);
+    }
+}
+
+// Update offer banner text
+function updateOfferBanner() {
+    const today = new Date();
+    const isFirstDay = today.getDate() === 1;
+    const bannerSpan = document.getElementById('offerBannerText');
+    if(bannerSpan) {
+        if(isFirstDay) {
+            bannerSpan.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
+        } else {
+            bannerSpan.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadHomeProducts();
+    updateOfferBanner();
+});
 </script>
 
 <script src="script.js"></script>
