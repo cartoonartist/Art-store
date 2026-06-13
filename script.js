@@ -618,4 +618,129 @@ async function loadHomeProducts() {
                 return `
                 <div class="card">
                     <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
-                    <h3>${drawing.name}</
+                    <h3>${drawing.name}</h3>
+                    <p>${drawing.description}</p>
+                    <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                    <div class="buttons" style="padding:10px;">
+                        <button onclick="addWishlist('${drawing.name.replace(/'/g, "\\'")}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
+                        <button onclick="addCart('${drawing.name.replace(/'/g, "\\'")}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
+                        <button onclick="buyNow('${drawing.name.replace(/'/g, "\\'")}', ${discountedPrice}, 'drawing', ${drawing.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        const keychainsRes = await fetch('data/keychains.json');
+        const keychains = await keychainsRes.json();
+        const first6Keychains = keychains.slice(0, 6);
+        
+        const keychainsGrid = document.getElementById('homeKeychainsGrid');
+        if(keychainsGrid) {
+            keychainsGrid.innerHTML = first6Keychains.map(keychain => {
+                const originalPrice = keychain.price;
+                const discount = getTotalDiscount('keychain');
+                const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+                const discountPercent = Math.floor(discount * 100);
+                const discountHtml = discount > 0 ? `<span style="color:#00ff88;"> (${discountPercent}% OFF)</span>` : '';
+                
+                if(keychain.sold) {
+                    return `
+                    <div class="card">
+                        <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
+                        <h3>${keychain.name}</h3>
+                        <p>${keychain.description}</p>
+                        <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                        <div class="sold-badge">SOLD OUT</div>
+                    </div>`;
+                }
+                
+                return `
+                <div class="card">
+                    <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
+                    <h3>${keychain.name}</h3>
+                    <p>${keychain.description}</p>
+                    <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
+                    <div class="buttons" style="padding:10px;">
+                        <button onclick="addWishlist('${keychain.name.replace(/'/g, "\\'")}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
+                        <button onclick="addCart('${keychain.name.replace(/'/g, "\\'")}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
+                        <button onclick="buyNow('${keychain.name.replace(/'/g, "\\'")}', ${discountedPrice}, 'keychain', ${keychain.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    } catch(error) {
+        console.error("Error loading home products:", error);
+    }
+}
+
+// ===========================
+// UPDATE OFFER BANNER
+// ===========================
+function updateOfferBanner() {
+    const isFirstDay = isMonthlyOfferDay();
+    const bannerSpans = document.querySelectorAll('#offerBannerText');
+    bannerSpans.forEach(span => {
+        if(span) {
+            if(isFirstDay) {
+                span.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
+            } else {
+                span.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
+            }
+        }
+    });
+}
+
+// ===========================
+// FLOATING ART ROTATION
+// ===========================
+const container = document.getElementById("floatingContainer");
+let rotation = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+
+document.addEventListener("touchstart", (e) => {
+    touchStartY = e.changedTouches[0].screenY;
+});
+
+document.addEventListener("touchend", (e) => {
+    touchEndY = e.changedTouches[0].screenY;
+    if(container) {
+        if(touchStartY - touchEndY > 50) {
+            rotation += 30;
+            container.style.transform = `rotate(${rotation}deg)`;
+        } else if(touchEndY - touchStartY > 50) {
+            rotation -= 30;
+            container.style.transform = `rotate(${rotation}deg)`;
+        }
+    }
+});
+
+window.addEventListener("wheel", (e) => {
+    if(container) {
+        if(e.deltaY < 0) rotation += 15;
+        else rotation -= 15;
+        container.style.transform = `rotate(${rotation}deg)`;
+    }
+});
+
+// ===========================
+// AUTO SAVE & INITIALIZATION
+// ===========================
+window.addEventListener("beforeunload", () => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    if(document.getElementById("drawingsContainer")) loadDrawings();
+    if(document.getElementById("keychainsContainer")) loadKeychains();
+    if(document.getElementById("homeDrawingsGrid")) loadHomeProducts();
+    
+    updateOfferBanner();
+    
+    const video = document.getElementById("bgVideo");
+    if(video) {
+        video.muted = true;
+        video.play().catch(error => console.log("Video autoplay blocked:", error));
+    }
+});
