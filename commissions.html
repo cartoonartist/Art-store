@@ -19,18 +19,8 @@
             <li><a href="drawings.html">Drawings</a></li>
             <li><a href="keychains.html">Keychains</a></li>
             <li><a href="commissions.html">Commission</a></li>
-            <li>
-                <a href="#">
-                    Wishlist
-                    <span id="wishlistCount">0</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    Cart
-                    <span id="cartCount">0</span>
-                </a>
-            </li>
+            <li><a href="#">Wishlist <span id="wishlistCount">0</span></a></li>
+            <li><a href="#">Cart <span id="cartCount">0</span></a></li>
         </ul>
     </nav>
 
@@ -48,7 +38,7 @@
             <p style="color: white; margin: 5px 0 0 0; font-size: 14px;">Limited slots available - Order now!</p>
         </div>
         
-        <form id="commissionForm">
+        <form id="commissionForm" enctype="multipart/form-data">
             <input type="text" id="commissionName" placeholder="Full Name" required>
             <input type="email" id="commissionEmail" placeholder="Email Address (for order updates)" required>
             <textarea id="commissionAddress" placeholder="Complete Address (with house number, street, landmark)" required></textarea>
@@ -56,7 +46,9 @@
             <input type="number" id="commissionPincode" placeholder="Pincode" required>
             <input type="tel" id="commissionPhone" placeholder="Phone Number (with country code)" required>
             
-            <textarea id="commissionReference" placeholder="Describe your reference image in detail (What character/scene/style do you want? Any specific pose, background, or elements?)" required style="min-height: 100px;"></textarea>
+            <label style="text-align:left; margin-top:10px; font-weight:bold; color:#00d4ff;">📷 REFERENCE IMAGE (MANDATORY):</label>
+            <input type="file" id="commissionReferenceImage" accept="image/*" required style="padding: 10px; background: #222; border: 1px solid #00d4ff;">
+            <p style="font-size: 12px; color: #ffcc00; margin-top: 5px;">* Please upload a clear reference image of what you want me to draw (character, pose, background, etc.)</p>
             
             <label style="text-align:left; margin-top:10px;">Select Size:</label>
             <select id="sheetSize">
@@ -98,21 +90,6 @@
         <p>Instagram : @kanishkv_456</p>
     </footer>
 
-    <script>
-        function updateOfferBanner() {
-            const today = new Date();
-            const isFirstDay = today.getDate() === 1;
-            const bannerSpan = document.getElementById('offerBannerText');
-            if(bannerSpan) {
-                if(isFirstDay) {
-                    bannerSpan.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
-                } else {
-                    bannerSpan.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
-                }
-            }
-        }
-        document.addEventListener('DOMContentLoaded', updateOfferBanner);
-    </script>
     <script src="script.js"></script>
 </body>
 </html>
