@@ -80,7 +80,7 @@
     <section class="home-product-section">
         <h2 class="section-title">🔥 FEATURED DRAWINGS <span style="font-size: 18px;">(20% OFF for first 20 customers!)</span></h2>
         <div class="home-product-grid" id="homeDrawingsGrid">
-            <!-- Will be loaded by JavaScript -->
+            <!-- Will be loaded by JavaScript with buttons -->
         </div>
         <div class="view-all-btn">
             <a href="drawings.html">View All Drawings →</a>
@@ -91,7 +91,7 @@
     <section class="home-product-section">
         <h2 class="section-title">🔑 FEATURED KEYCHAINS <span style="font-size: 18px;">(20% OFF for first 20 customers!)</span></h2>
         <div class="home-product-grid" id="homeKeychainsGrid">
-            <!-- Will be loaded by JavaScript -->
+            <!-- Will be loaded by JavaScript with buttons -->
         </div>
         <div class="view-all-btn">
             <a href="keychains.html">View All Keychains →</a>
@@ -118,73 +118,6 @@
 
 <script>
 emailjs.init("2XhNwiYxl5KZMK4d0");
-</script>
-
-<script>
-// Load homepage preview products
-async function loadHomeProducts() {
-    try {
-        // Load drawings
-        const drawingsRes = await fetch('data/drawings.json');
-        const drawings = await drawingsRes.json();
-        const first6Drawings = drawings.slice(0, 6);
-        
-        const drawingsGrid = document.getElementById('homeDrawingsGrid');
-        if(drawingsGrid) {
-            drawingsGrid.innerHTML = first6Drawings.map(drawing => {
-                const originalPrice = drawing.price + drawing.delivery;
-                return `
-                <div class="card">
-                    <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
-                    <h3>${drawing.name}</h3>
-                    <p>${drawing.description}</p>
-                    <p><strong>₹${originalPrice}</strong></p>
-                    <div class="offer-badge">10% OFF</div>
-                </div>
-            `}).join('');
-        }
-        
-        // Load keychains
-        const keychainsRes = await fetch('data/keychains.json');
-        const keychains = await keychainsRes.json();
-        const first6Keychains = keychains.slice(0, 6);
-        
-        const keychainsGrid = document.getElementById('homeKeychainsGrid');
-        if(keychainsGrid) {
-            keychainsGrid.innerHTML = first6Keychains.map(keychain => {
-                return `
-                <div class="card">
-                    <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
-                    <h3>${keychain.name}</h3>
-                    <p>${keychain.description}</p>
-                    <p><strong>₹${keychain.price}</strong></p>
-                    <div class="offer-badge">10% OFF</div>
-                </div>
-            `}).join('');
-        }
-    } catch(error) {
-        console.error("Error loading home products:", error);
-    }
-}
-
-// Update offer banner text
-function updateOfferBanner() {
-    const today = new Date();
-    const isFirstDay = today.getDate() === 1;
-    const bannerSpan = document.getElementById('offerBannerText');
-    if(bannerSpan) {
-        if(isFirstDay) {
-            bannerSpan.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
-        } else {
-            bannerSpan.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadHomeProducts();
-    updateOfferBanner();
-});
 </script>
 
 <script src="script.js"></script>
