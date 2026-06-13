@@ -10,13 +10,23 @@ updateCounters();
 // ===========================
 // UPDATE COUNTERS
 // ===========================
-
 function updateCounters() {
 
-    document.getElementById("cartCount").innerText = cart.length;
+    const cartCount =
+    document.getElementById("cartCount");
 
-    document.getElementById("wishlistCount").innerText = wishlist.length;
+    const wishlistCount =
+    document.getElementById("wishlistCount");
+
+    if(cartCount){
+        cartCount.innerText = cart.length;
+    }
+
+    if(wishlistCount){
+        wishlistCount.innerText = wishlist.length;
+    }
 }
+
 
 // ===========================
 // WISHLIST
@@ -133,18 +143,20 @@ function calculateCommission() {
     commissionPrice.innerText =
     "Total : ₹" + total;
 }
+if(sheetSize && medium && commissionPrice){
 
-sheetSize.addEventListener(
-    "change",
-    calculateCommission
-);
+    sheetSize.addEventListener(
+        "change",
+        calculateCommission
+    );
 
-medium.addEventListener(
-    "change",
-    calculateCommission
-);
+    medium.addEventListener(
+        "change",
+        calculateCommission
+    );
 
-calculateCommission();
+    calculateCommission();
+}
 
 // ===========================
 // COMMISSION ORDER
