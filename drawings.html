@@ -1,19 +1,82 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Drawings | Kanishk Art Store</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-emailjs.init("2XhNwiYxl5KZMK4d0");
-</script>
-</head><body><nav>
-<div class="logo">KANISHK ART STORE</div><ul>
-<li><a href="index.html">Home</a></li>
-<li><a href="drawings.html">Drawings</a></li>
-<li><a href="keychains.html">Keychains</a></li>
-<li><a href="commissions.html">Commission</a></li>
-</ul>
-</nav><section class="section"><h2 class="section-title">DRAWINGS</h2><div id="drawingsContainer" class="product-grid"></div><div id="drawingsPagination"></div></section><script src="script.js"></script></body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawings | Kanishk Art Store</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        emailjs.init("2XhNwiYxl5KZMK4d0");
+    </script>
+</head>
+<body>
+    <nav>
+        <div class="logo">KANISHK ART STORE</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="drawings.html">Drawings</a></li>
+            <li><a href="keychains.html">Keychains</a></li>
+            <li><a href="commissions.html">Commission</a></li>
+            <li>
+                <a href="#">
+                    Wishlist
+                    <span id="wishlistCount">0</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    Cart
+                    <span id="cartCount">0</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Offer Banner -->
+    <div class="offer-banner" style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 12px; text-align: center; color: white; font-weight: bold;">
+        <span id="offerBannerText">Loading offers...</span>
+    </div>
+
+    <section class="section">
+        <h2 class="section-title">DRAWINGS</h2>
+        <div id="drawingsContainer" class="product-grid"></div>
+        <div id="drawingsPagination"></div>
+    </section>
+
+    <!-- PAYMENT POPUP -->
+    <div id="paymentPopup" class="popup">
+        <div class="popup-content">
+            <span id="closePopup">&times;</span>
+            <h2>Complete Payment</h2>
+            <img src="images/QR.jpg" alt="QR Code" class="qr">
+            <input type="file" id="paymentScreenshot" accept="image/*" required>
+            <button id="submitPayment">Submit Payment Proof</button>
+        </div>
+    </div>
+
+    <footer>
+        <h3>Kanishk Art Store</h3>
+        <p>Handmade Art • Custom Artwork • Keychains</p>
+        <p>Instagram : @kanishkv_456</p>
+    </footer>
+
+    <script>
+        function updateOfferBanner() {
+            const today = new Date();
+            const isFirstDay = today.getDate() === 1;
+            const bannerSpan = document.getElementById('offerBannerText');
+            if(bannerSpan) {
+                if(isFirstDay) {
+                    bannerSpan.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
+                } else {
+                    bannerSpan.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateOfferBanner);
+    </script>
+    <script src="script.js"></script>
+</body>
 </html>
