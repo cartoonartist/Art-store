@@ -19,15 +19,16 @@ body{
     position:fixed;
     top:0;
     left:0;
-
     width:100%;
     height:100%;
-
     object-fit:cover;
 
     z-index:-10;
-}
 
+    transform:translateZ(0);
+    will-change:transform;
+    backface-visibility:hidden;
+}
 #videoOverlay{
     position:fixed;
     inset:0;
