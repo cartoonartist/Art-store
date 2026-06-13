@@ -18,7 +18,47 @@ function updateCounters() {
 }
 
 // ===========================
-// LOAD DRAWINGS FROM JSON
+// TRACK FIRST TIME BUYERS
+// ===========================
+let drawingBuyers = JSON.parse(localStorage.getItem("drawingBuyers")) || [];
+let keychainBuyers = JSON.parse(localStorage.getItem("keychainBuyers")) || [];
+let commissionBuyers = JSON.parse(localStorage.getItem("commissionBuyers")) || [];
+
+function getDrawingDiscount() {
+    return drawingBuyers.length < 20 ? 0.20 : 0; // 20% off for first 20 customers
+}
+
+function getKeychainDiscount() {
+    return keychainBuyers.length < 20 ? 0.20 : 0; // 20% off for first 20 customers
+}
+
+function getCommissionDiscount() {
+    return commissionBuyers.length < 10 ? 0.40 : 0; // 40% off for first 10 customers
+}
+
+function markDrawingBuyer(email) {
+    if(!drawingBuyers.includes(email) && drawingBuyers.length < 20) {
+        drawingBuyers.push(email);
+        localStorage.setItem("drawingBuyers", JSON.stringify(drawingBuyers));
+    }
+}
+
+function markKeychainBuyer(email) {
+    if(!keychainBuyers.includes(email) && keychainBuyers.length < 20) {
+        keychainBuyers.push(email);
+        localStorage.setItem("keychainBuyers", JSON.stringify(keychainBuyers));
+    }
+}
+
+function markCommissionBuyer(email) {
+    if(!commissionBuyers.includes(email) && commissionBuyers.length < 10) {
+        commissionBuyers.push(email);
+        localStorage.setItem("commissionBuyers", JSON.stringify(commissionBuyers));
+    }
+}
+
+// ===========================
+// LOAD DRAWINGS FROM JSON (15 items)
 // ===========================
 let currentDrawingsPage = 1;
 const drawingsPerPage = 6;
@@ -43,6 +83,7 @@ function renderDrawings() {
     const start = (currentDrawingsPage - 1) * drawingsPerPage;
     const end = start + drawingsPerPage;
     const pageDrawings = allDrawings.slice(start, end);
+    const discount = getDrawingDiscount();
     
     if(pageDrawings.length === 0) {
         container.innerHTML = "<p style='text-align:center;'>No drawings available.</p>";
@@ -50,23 +91,27 @@ function renderDrawings() {
         return;
     }
     
-    container.innerHTML = pageDrawings.map(drawing => `
+    container.innerHTML = pageDrawings.map(drawing => {
+        const originalPrice = drawing.price + drawing.delivery;
+        const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+        const discountText = discount > 0 ? `<span style="color:#00ff88; font-size:14px;"> (20% OFF! Was ₹${originalPrice})</span>` : '';
+        
+        return `
         <div class="card">
             <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
             <h3>${drawing.name}</h3>
             <p>${drawing.description}</p>
             <p>Size: ${drawing.size} | Paper: ${drawing.paper}</p>
-            <p>Price: ₹${drawing.price} + ₹${drawing.delivery} delivery</p>
-            <p><strong>Total: ₹${drawing.price + drawing.delivery}</strong></p>
+            <p><strong style="color:#00ff88;">🔥 Offer Price: ₹${discountedPrice}</strong>${discountText}</p>
             ${drawing.sold ? '<div class="sold-badge">SOLD OUT</div>' : `
                 <div class="buttons">
                     <button onclick="addWishlist('${drawing.name}')">❤️ Wishlist</button>
-                    <button onclick="addCart('${drawing.name}', ${drawing.price + drawing.delivery})">🛒 Cart</button>
-                    <button onclick="buyNow('${drawing.name}', ${drawing.price + drawing.delivery}, 'drawing', ${drawing.id})">💳 Buy Now</button>
+                    <button onclick="addCart('${drawing.name}', ${discountedPrice})">🛒 Cart</button>
+                    <button onclick="buyNow('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})">💳 Buy Now</button>
                 </div>
             `}
         </div>
-    `).join('');
+    `}).join('');
     
     updateDrawingsPagination();
 }
@@ -96,7 +141,7 @@ function goToDrawingsPage(page) {
 }
 
 // ===========================
-// LOAD KEYCHAINS FROM JSON
+// LOAD KEYCHAINS FROM JSON (15 items)
 // ===========================
 let currentKeychainsPage = 1;
 const keychainsPerPage = 6;
@@ -121,6 +166,7 @@ function renderKeychains() {
     const start = (currentKeychainsPage - 1) * keychainsPerPage;
     const end = start + keychainsPerPage;
     const pageKeychains = allKeychains.slice(start, end);
+    const discount = getKeychainDiscount();
     
     if(pageKeychains.length === 0) {
         container.innerHTML = "<p style='text-align:center;'>No keychains available.</p>";
@@ -128,21 +174,27 @@ function renderKeychains() {
         return;
     }
     
-    container.innerHTML = pageKeychains.map(keychain => `
+    container.innerHTML = pageKeychains.map(keychain => {
+        const originalPrice = keychain.price;
+        const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
+        const discountText = discount > 0 ? `<span style="color:#00ff88; font-size:14px;"> (20% OFF! Was ₹${originalPrice})</span>` : '';
+        
+        return `
         <div class="card">
             <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
             <h3>${keychain.name}</h3>
             <p>${keychain.description}</p>
-            <p>Price: ₹${keychain.price} ${keychain.deliveryIncluded ? '(Delivery included)' : '+ delivery'}</p>
+            <p><strong style="color:#00ff88;">🔥 Offer Price: ₹${discountedPrice}</strong>${discountText}</p>
+            <p style="font-size:12px;">${keychain.deliveryIncluded ? '✓ Delivery included' : '+ delivery extra'}</p>
             ${keychain.sold ? '<div class="sold-badge">SOLD OUT</div>' : `
                 <div class="buttons">
                     <button onclick="addWishlist('${keychain.name}')">❤️ Wishlist</button>
-                    <button onclick="addCart('${keychain.name}', ${keychain.price})">🛒 Cart</button>
-                    <button onclick="buyNow('${keychain.name}', ${keychain.price}, 'keychain', ${keychain.id})">💳 Buy Now</button>
+                    <button onclick="addCart('${keychain.name}', ${discountedPrice})">🛒 Cart</button>
+                    <button onclick="buyNow('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})">💳 Buy Now</button>
                 </div>
             `}
         </div>
-    `).join('');
+    `}).join('');
     
     updateKeychainsPagination();
 }
@@ -196,12 +248,13 @@ function addCart(product, price) {
 }
 
 // ===========================
-// BUY NOW (FIXED)
+// BUY NOW
 // ===========================
 let currentOrderType = null;
 let currentOrderId = null;
 let currentOrderPrice = null;
 let currentOrderName = null;
+let currentCustomerEmail = null;
 
 function buyNow(product, price, type, id) {
     currentOrderName = product;
@@ -212,7 +265,6 @@ function buyNow(product, price, type, id) {
     const popup = document.getElementById("paymentPopup");
     if(popup) {
         popup.style.display = "block";
-        // Clear previous file input
         const fileInput = document.getElementById("paymentScreenshot");
         if(fileInput) fileInput.value = "";
     }
@@ -247,7 +299,11 @@ function calculateCommission() {
     if(sheetSize && medium && commissionPrice) {
         const sizePrice = parseInt(sheetSize.value) || 0;
         const mediumPrice = parseInt(medium.value) || 0;
-        const total = sizePrice + mediumPrice;
+        let total = sizePrice + mediumPrice;
+        const discount = getCommissionDiscount();
+        if(discount > 0) {
+            total = Math.floor(total * (1 - discount));
+        }
         commissionPrice.innerText = "Total : ₹" + total;
     }
 }
@@ -259,27 +315,36 @@ if(sheetSize && medium && commissionPrice) {
 }
 
 // ===========================
-// COMMISSION ORDER (FIXED)
+// COMMISSION ORDER (FIXED with reference image)
 // ===========================
 function commissionOrder() {
     const sizePrice = parseInt(sheetSize?.value) || 0;
     const mediumPrice = parseInt(medium?.value) || 0;
-    const total = sizePrice + mediumPrice;
+    let total = sizePrice + mediumPrice;
+    const discount = getCommissionDiscount();
+    const discountPercent = discount * 100;
+    
+    if(discount > 0) {
+        total = Math.floor(total * (1 - discount));
+    }
     
     // Get form values
-    const fullName = document.querySelector('#commissionForm input[type="text"]')?.value || "";
-    const address = document.querySelector('#commissionForm textarea')?.value || "";
-    const city = document.querySelectorAll('#commissionForm input[type="text"]')[1]?.value || "";
-    const pincode = document.querySelector('#commissionForm input[type="number"]')?.value || "";
-    const phone = document.querySelector('#commissionForm input[type="tel"]')?.value || "";
+    const fullName = document.getElementById('commissionName')?.value || "";
+    const address = document.getElementById('commissionAddress')?.value || "";
+    const city = document.getElementById('commissionCity')?.value || "";
+    const pincode = document.getElementById('commissionPincode')?.value || "";
+    const phone = document.getElementById('commissionPhone')?.value || "";
+    const email = document.getElementById('commissionEmail')?.value || "";
+    const referenceDesc = document.getElementById('commissionReference')?.value || "";
     const sheetSizeText = sheetSize?.options[sheetSize.selectedIndex]?.text || "";
     const mediumText = medium?.options[medium.selectedIndex]?.text || "";
     
-    if(!fullName || !address || !city || !pincode || !phone) {
-        alert("Please fill all commission form fields.");
+    if(!fullName || !address || !city || !pincode || !phone || !email || !referenceDesc) {
+        alert("Please fill all commission form fields including reference image description and email.");
         return;
     }
     
+    currentCustomerEmail = email;
     currentOrderType = "commission";
     currentOrderName = `Commission: ${mediumText} on ${sheetSizeText}`;
     currentOrderPrice = total;
@@ -287,7 +352,7 @@ function commissionOrder() {
     
     // Store commission details for email
     window.commissionDetails = {
-        fullName, address, city, pincode, phone, sheetSizeText, mediumText
+        fullName, address, city, pincode, phone, email, referenceDesc, sheetSizeText, mediumText, discountPercent
     };
     
     const popup = document.getElementById("paymentPopup");
@@ -321,21 +386,32 @@ if(submitBtn) {
                 ORDER TYPE: Commission
                 Order ID: ${currentOrderId}
                 Customer: ${window.commissionDetails?.fullName || "N/A"}
+                Email: ${window.commissionDetails?.email || "N/A"}
                 Address: ${window.commissionDetails?.address || "N/A"}, ${window.commissionDetails?.city || "N/A"} - ${window.commissionDetails?.pincode || "N/A"}
                 Phone: ${window.commissionDetails?.phone || "N/A"}
                 Details: ${window.commissionDetails?.mediumText || "N/A"} on ${window.commissionDetails?.sheetSizeText || "N/A"}
+                Reference Image Description: ${window.commissionDetails?.referenceDesc || "N/A"}
+                Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF (First 10 customers)
                 Total Price: ₹${currentOrderPrice}
                 Order Date: ${new Date().toLocaleString()}
             `;
+            markCommissionBuyer(window.commissionDetails?.email);
         } else {
             emailSubject = `NEW ORDER - ${currentOrderName}`;
+            let discountApplied = currentOrderType === 'drawing' ? getDrawingDiscount() * 100 : getKeychainDiscount() * 100;
             emailMessage = `
                 ORDER TYPE: ${currentOrderType?.toUpperCase() || "PRODUCT"}
                 Product: ${currentOrderName}
                 Product ID: ${currentOrderId}
                 Total Price: ₹${currentOrderPrice}
+                Discount Applied: ${discountApplied}% OFF (First 20 customers)
                 Order Date: ${new Date().toLocaleString()}
             `;
+            if(currentOrderType === 'drawing') {
+                markDrawingBuyer(currentCustomerEmail || 'customer@example.com');
+            } else if(currentOrderType === 'keychain') {
+                markKeychainBuyer(currentCustomerEmail || 'customer@example.com');
+            }
         }
         
         emailjs.send(
@@ -348,12 +424,12 @@ if(submitBtn) {
                 frame_type: currentOrderType === "commission" ? "Commission Order" : "Product Purchase",
                 total_price: currentOrderPrice,
                 commission_details: emailMessage,
-                user_email: "customer@example.com",
+                user_email: currentCustomerEmail || "customer@example.com",
                 message: emailMessage
             }
         )
         .then(function() {
-            alert("✅ Order submitted successfully! We'll contact you within 24 hours.");
+            alert("✅ Order submitted successfully! We'll contact you within 24 hours via email/Instagram.");
             document.getElementById("paymentPopup").style.display = "none";
             
             // Reset order data
@@ -361,6 +437,7 @@ if(submitBtn) {
             currentOrderId = null;
             currentOrderPrice = null;
             currentOrderName = null;
+            currentCustomerEmail = null;
             window.commissionDetails = null;
             
             // Clear file input
