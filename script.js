@@ -296,6 +296,7 @@ let currentOrderId = null;
 let currentOrderPrice = null;
 let currentOrderName = null;
 let currentCustomerEmail = null;
+let currentReferenceImage = null;
 
 function buyNow(product, price, type, id) {
     currentOrderName = product;
@@ -354,10 +355,20 @@ if(sheetSize && medium && commissionPrice) {
     calculateCommission();
 }
 
+// Function to convert image to base64
+function imageToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
 // ===========================
-// COMMISSION ORDER (with reference image mandatory)
+// COMMISSION ORDER (with image file)
 // ===========================
-function commissionOrder() {
+async function commissionOrder() {
     // Get all form values
     const fullName = document.getElementById('commissionName')?.value.trim() || "";
     const email = document.getElementById('commissionEmail')?.value.trim() || "";
@@ -365,9 +376,9 @@ function commissionOrder() {
     const city = document.getElementById('commissionCity')?.value.trim() || "";
     const pincode = document.getElementById('commissionPincode')?.value.trim() || "";
     const phone = document.getElementById('commissionPhone')?.value.trim() || "";
-    const referenceDesc = document.getElementById('commissionReference')?.value.trim() || "";
+    const referenceImage = document.getElementById('commissionReferenceImage')?.files[0];
     
-    // Validation - Reference Image Description is MANDATORY
+    // Validation
     if(!fullName) {
         alert("❌ Please enter your full name.");
         return;
@@ -392,8 +403,18 @@ function commissionOrder() {
         alert("❌ Please enter your phone number.");
         return;
     }
-    if(!referenceDesc) {
-        alert("❌ REFERENCE IMAGE DESCRIPTION IS MANDATORY! Please describe what you want me to draw. (Character, pose, background, etc.)");
+    if(!referenceImage) {
+        alert("❌ REFERENCE IMAGE IS MANDATORY! Please upload a reference image of what you want me to draw.");
+        return;
+    }
+    
+    // Convert image to base64 for email
+    let imageBase64 = "";
+    try {
+        imageBase64 = await imageToBase64(referenceImage);
+    } catch(error) {
+        console.error("Error converting image:", error);
+        alert("Error processing image. Please try again.");
         return;
     }
     
@@ -415,10 +436,12 @@ function commissionOrder() {
     currentOrderName = `Commission: ${mediumText} on ${sheetSizeText}`;
     currentOrderPrice = total;
     currentOrderId = Date.now();
+    currentReferenceImage = imageBase64;
     
     window.commissionDetails = {
         fullName, address, city, pincode, phone, email, 
-        referenceDesc, sheetSizeText, mediumText, 
+        referenceImageName: referenceImage.name,
+        sheetSizeText, mediumText, 
         discountPercent, isMonthlyOffer: isMonthlyOfferDay()
     };
     
@@ -431,11 +454,11 @@ function commissionOrder() {
 }
 
 // ===========================
-// SUBMIT PAYMENT
+// SUBMIT PAYMENT (with commission image)
 // ===========================
 const submitBtn = document.getElementById("submitPayment");
 if(submitBtn) {
-    submitBtn.addEventListener("click", function() {
+    submitBtn.addEventListener("click", async function() {
         const screenshot = document.getElementById("paymentScreenshot");
         
         if(!screenshot || screenshot.files.length === 0) {
@@ -467,8 +490,9 @@ if(submitBtn) {
 ║ Size: ${window.commissionDetails?.sheetSizeText || "N/A"}
 ║ Medium: ${window.commissionDetails?.mediumText || "N/A"}
 ║
-║ 🖼️ REFERENCE IMAGE DESCRIPTION (MANDATORY):
-║ ${window.commissionDetails?.referenceDesc || "N/A"}
+║ 📷 REFERENCE IMAGE:
+║ Filename: ${window.commissionDetails?.referenceImageName || "N/A"}
+║ (Image attached separately as base64)
 ║
 ║ 💰 PRICE DETAILS:
 ║ Discount Applied: ${window.commissionDetails?.discountPercent || 0}% OFF
@@ -510,43 +534,60 @@ if(submitBtn) {
             }
         }
         
+        // Prepare email data with commission image if exists
+        const emailData = {
+            product_name: currentOrderName,
+            product_id: currentOrderId,
+            sale_date: new Date().toLocaleString(),
+            frame_type: currentOrderType === "commission" ? "Commission Order" : "Product Purchase",
+            total_price: currentOrderPrice,
+            commission_details: emailMessage,
+            user_email: currentCustomerEmail || "customer@example.com",
+            message: emailMessage
+        };
+        
+        // Add reference image for commission orders
+        if(currentOrderType === "commission" && currentReferenceImage) {
+            emailData.reference_image = currentReferenceImage;
+            emailData.reference_image_name = window.commissionDetails?.referenceImageName || "reference.jpg";
+        }
+        
         emailjs.send(
             "service_t2hgt6w",
             "template_9q28bu6",
-            {
-                product_name: currentOrderName,
-                product_id: currentOrderId,
-                sale_date: new Date().toLocaleString(),
-                frame_type: currentOrderType === "commission" ? "Commission Order" : "Product Purchase",
-                total_price: currentOrderPrice,
-                commission_details: emailMessage,
-                user_email: currentCustomerEmail || "customer@example.com",
-                message: emailMessage
-            }
+            emailData
         )
         .then(function() {
-            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\nWe'll contact you within 24 hours via email/Instagram.\n\n📧 Check your email for confirmation.");
+            alert("✅ ORDER SUBMITTED SUCCESSFULLY!\n\nWe'll contact you within 24 hours via email/Instagram.\n\n📧 Check your email for confirmation.\n🖼️ Your reference image has been received.");
             document.getElementById("paymentPopup").style.display = "none";
+            
+            // Reset commission form
+            if(currentOrderType === "commission") {
+                const form = document.getElementById("commissionForm");
+                if(form) form.reset();
+                calculateCommission();
+            }
             
             currentOrderType = null;
             currentOrderId = null;
             currentOrderPrice = null;
             currentOrderName = null;
             currentCustomerEmail = null;
+            currentReferenceImage = null;
             window.commissionDetails = null;
             
             if(screenshot) screenshot.value = "";
         })
         .catch(function(error) {
             console.error("Email error:", error);
-            alert("❌ Order received but notification failed.\n\nPlease DM your screenshot on Instagram @kanishkv_456\n\nWe will process your order manually.");
+            alert("❌ Order received but notification failed.\n\nPlease DM your screenshot and reference image on Instagram @kanishkv_456\n\nWe will process your order manually.");
             document.getElementById("paymentPopup").style.display = "none";
         });
     });
 }
 
 // ===========================
-// HOMEPAGE PRODUCTS WITH BUY NOW
+// HOMEPAGE PRODUCTS WITH ALL BUTTONS
 // ===========================
 async function loadHomeProducts() {
     try {
@@ -577,129 +618,4 @@ async function loadHomeProducts() {
                 return `
                 <div class="card">
                     <img src="${drawing.image}" alt="${drawing.name}" onerror="this.src='images/placeholder.jpg'">
-                    <h3>${drawing.name}</h3>
-                    <p>${drawing.description}</p>
-                    <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
-                    <div class="buttons" style="padding:10px;">
-                        <button onclick="addWishlist('${drawing.name}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
-                        <button onclick="addCart('${drawing.name}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
-                        <button onclick="buyNow('${drawing.name}', ${discountedPrice}, 'drawing', ${drawing.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-        
-        const keychainsRes = await fetch('data/keychains.json');
-        const keychains = await keychainsRes.json();
-        const first6Keychains = keychains.slice(0, 6);
-        
-        const keychainsGrid = document.getElementById('homeKeychainsGrid');
-        if(keychainsGrid) {
-            keychainsGrid.innerHTML = first6Keychains.map(keychain => {
-                const originalPrice = keychain.price;
-                const discount = getTotalDiscount('keychain');
-                const discountedPrice = discount > 0 ? Math.floor(originalPrice * (1 - discount)) : originalPrice;
-                const discountPercent = Math.floor(discount * 100);
-                const discountHtml = discount > 0 ? `<span style="color:#00ff88;"> (${discountPercent}% OFF)</span>` : '';
-                
-                if(keychain.sold) {
-                    return `
-                    <div class="card">
-                        <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
-                        <h3>${keychain.name}</h3>
-                        <p>${keychain.description}</p>
-                        <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
-                        <div class="sold-badge">SOLD OUT</div>
-                    </div>`;
-                }
-                
-                return `
-                <div class="card">
-                    <img src="${keychain.image}" alt="${keychain.name}" onerror="this.src='images/placeholder.jpg'">
-                    <h3>${keychain.name}</h3>
-                    <p>${keychain.description}</p>
-                    <p><strong>₹${discountedPrice}</strong>${discountHtml}</p>
-                    <div class="buttons" style="padding:10px;">
-                        <button onclick="addWishlist('${keychain.name}')" style="padding:8px; font-size:12px;">❤️ Wishlist</button>
-                        <button onclick="addCart('${keychain.name}', ${discountedPrice})" style="padding:8px; font-size:12px;">🛒 Cart</button>
-                        <button onclick="buyNow('${keychain.name}', ${discountedPrice}, 'keychain', ${keychain.id})" style="padding:8px; font-size:12px;">💳 Buy Now</button>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-    } catch(error) {
-        console.error("Error loading home products:", error);
-    }
-}
-
-// ===========================
-// UPDATE OFFER BANNER
-// ===========================
-function updateOfferBanner() {
-    const isFirstDay = isMonthlyOfferDay();
-    const bannerSpans = document.querySelectorAll('#offerBannerText');
-    bannerSpans.forEach(span => {
-        if(span) {
-            if(isFirstDay) {
-                span.innerHTML = "🎉 MONTHLY OFFER: 10% OFF ON EVERYTHING TODAY ONLY! (1st Day Special) 🎉";
-            } else {
-                span.innerHTML = "✨ FIRST 20 CUSTOMERS GET 20% OFF | FIRST 10 COMMISSIONS GET 40% OFF ✨";
-            }
-        }
-    });
-}
-
-// ===========================
-// FLOATING ART ROTATION
-// ===========================
-const container = document.getElementById("floatingContainer");
-let rotation = 0;
-let touchStartY = 0;
-let touchEndY = 0;
-
-document.addEventListener("touchstart", (e) => {
-    touchStartY = e.changedTouches[0].screenY;
-});
-
-document.addEventListener("touchend", (e) => {
-    touchEndY = e.changedTouches[0].screenY;
-    if(container) {
-        if(touchStartY - touchEndY > 50) {
-            rotation += 30;
-            container.style.transform = `rotate(${rotation}deg)`;
-        } else if(touchEndY - touchStartY > 50) {
-            rotation -= 30;
-            container.style.transform = `rotate(${rotation}deg)`;
-        }
-    }
-});
-
-window.addEventListener("wheel", (e) => {
-    if(container) {
-        if(e.deltaY < 0) rotation += 15;
-        else rotation -= 15;
-        container.style.transform = `rotate(${rotation}deg)`;
-    }
-});
-
-// ===========================
-// AUTO SAVE & INITIALIZATION
-// ===========================
-window.addEventListener("beforeunload", () => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-    if(document.getElementById("drawingsContainer")) loadDrawings();
-    if(document.getElementById("keychainsContainer")) loadKeychains();
-    if(document.getElementById("homeDrawingsGrid")) loadHomeProducts();
-    
-    updateOfferBanner();
-    
-    const video = document.getElementById("bgVideo");
-    if(video) {
-        video.muted = true;
-        video.play().catch(error => console.log("Video autoplay blocked:", error));
-    }
-});
+                    <h3>${drawing.name}</
