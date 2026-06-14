@@ -19,12 +19,12 @@
             <li><a href="drawings.html">Drawings</a></li>
             <li><a href="keychains.html">Keychains</a></li>
             <li><a href="commissions.html">Commission</a></li>
-            <li><a href="#" onclick="showLoginPopup()">👤 Login</a></li>
-            <li><a href="#">Wishlist <span id="wishlistCount">0</span></a></li>
-            <li><a href="#">Cart <span id="cartCount">0</span></a></li>
+            <li><a href="#" onclick="viewWishlist(); return false;">Wishlist <span id="wishlistCount">0</span></a></li>
+            <li><a href="#" onclick="viewCart(); return false;">Cart <span id="cartCount">0</span></a></li>
         </ul>
     </nav>
 
+    <!-- Customer Info Display -->
     <div id="customerInfo" style="position: fixed; top: 80px; right: 20px; z-index: 1001;"></div>
 
     <div class="offer-banner" style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 12px; text-align: center; color: white; font-weight: bold;">
@@ -40,7 +40,7 @@
     <!-- LOGIN POPUP -->
     <div id="loginPopup" class="popup">
         <div class="popup-content" style="max-width: 400px;">
-            <span onclick="closeLoginPopup()">&times;</span>
+            <span onclick="closeLoginPopup()" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>🔐 Login / Signup</h2>
             <p style="color: #00d4ff; font-size: 14px;">Enter your email to login or create account</p>
             <input type="email" id="loginEmail" placeholder="Your Email Address *" style="width:100%; margin-bottom:15px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
@@ -52,15 +52,16 @@
     <!-- DELIVERY POPUP -->
     <div id="deliveryPopup" class="popup">
         <div class="popup-content" style="max-width: 500px;">
-            <span id="closeDeliveryPopup">&times;</span>
+            <span id="closeDeliveryPopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>📦 Delivery Details</h2>
-            <input type="text" id="deliveryName" placeholder="Full Name *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white;">
-            <input type="email" id="deliveryEmail" placeholder="Email Address *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white;">
-            <input type="text" id="deliveryCity" placeholder="City *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white;">
-            <input type="text" id="deliveryPincode" placeholder="Pincode * (6 digits)" maxlength="6" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white;">
+            <p style="color: #00d4ff; font-size: 14px; margin-bottom: 15px;">Please fill in your shipping information</p>
+            <input type="text" id="deliveryName" placeholder="Full Name *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="email" id="deliveryEmail" placeholder="Email Address *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="text" id="deliveryCity" placeholder="City *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="text" id="deliveryPincode" placeholder="Pincode * (6 digits)" maxlength="6" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
             <textarea id="deliveryAddress" placeholder="Complete Address *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; min-height:80px;"></textarea>
-            <input type="text" id="deliveryState" placeholder="State *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white;">
-            <input type="tel" id="deliveryPhone" placeholder="Phone Number * (10 digits)" maxlength="10" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white;">
+            <input type="text" id="deliveryState" placeholder="State *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="tel" id="deliveryPhone" placeholder="Phone Number * (10 digits)" maxlength="10" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
             <button onclick="submitDeliveryDetails()" style="width:100%; padding:12px; background:#00d4ff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Proceed to Payment</button>
         </div>
     </div>
@@ -68,7 +69,7 @@
     <!-- PAYMENT POPUP -->
     <div id="paymentPopup" class="popup">
         <div class="popup-content">
-            <span id="closePopup">&times;</span>
+            <span id="closePopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>Complete Payment</h2>
             <img src="images/QR.jpg" alt="QR Code" class="qr">
             <p>Scan QR code & pay the exact amount</p>
@@ -86,7 +87,8 @@
     <script src="script.js"></script>
     <script>
         function closeLoginPopup() {
-            document.getElementById("loginPopup").style.display = "none";
+            const popup = document.getElementById("loginPopup");
+            if(popup) popup.style.display = "none";
         }
     </script>
 </body>
