@@ -19,12 +19,12 @@
             <li><a href="drawings.html">Drawings</a></li>
             <li><a href="keychains.html">Keychains</a></li>
             <li><a href="commissions.html">Commission</a></li>
-            <li><a href="#" onclick="showLoginPopup()">👤 Login</a></li>
-            <li><a href="#">Wishlist <span id="wishlistCount">0</span></a></li>
-            <li><a href="#">Cart <span id="cartCount">0</span></a></li>
+            <li><a href="#" onclick="viewWishlist(); return false;">Wishlist <span id="wishlistCount">0</span></a></li>
+            <li><a href="#" onclick="viewCart(); return false;">Cart <span id="cartCount">0</span></a></li>
         </ul>
     </nav>
 
+    <!-- Customer Info Display -->
     <div id="customerInfo" style="position: fixed; top: 80px; right: 20px; z-index: 1001;"></div>
 
     <div class="offer-banner" style="background: linear-gradient(135deg, #ff0080, #ff8c00); padding: 12px; text-align: center; color: white; font-weight: bold;">
@@ -41,7 +41,7 @@
         
         <form id="commissionForm" enctype="multipart/form-data">
             <label style="text-align:left; margin-top:10px; font-weight:bold; color:#00d4ff;">📷 REFERENCE IMAGE (MANDATORY):</label>
-            <input type="file" id="commissionReferenceImage" accept="image/*" required style="padding: 10px; background: #222; border: 1px solid #00d4ff; border-radius: 8px; color: white;">
+            <input type="file" id="commissionReferenceImage" accept="image/*" required style="padding: 10px; background: #222; border: 1px solid #00d4ff; border-radius: 8px; color: white; width:100%;">
             <p style="font-size: 12px; color: #ffcc00; margin-top: 5px;">* Please upload a clear reference image of what you want me to draw</p>
             
             <label style="text-align:left; margin-top:10px;">Select Size:</label>
@@ -62,14 +62,14 @@
             <p style="font-size: 12px; color: #00ff88; text-align: center;">✨ 40% discount automatically applied for first 10 customers!</p>
             <p style="font-size: 12px; color: #ffcc00; text-align: center;">🎁 On 1st of every month: Extra 10% OFF!</p>
             
-            <button type="button" onclick="commissionOrder()">Order Commission</button>
+            <button type="button" onclick="commissionOrder()" style="width:100%; padding:15px; background:#00d4ff; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Order Commission</button>
         </form>
     </section>
 
     <!-- LOGIN POPUP -->
     <div id="loginPopup" class="popup">
         <div class="popup-content" style="max-width: 400px;">
-            <span onclick="closeLoginPopup()">&times;</span>
+            <span onclick="closeLoginPopup()" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>🔐 Login / Signup</h2>
             <p style="color: #00d4ff; font-size: 14px;">Enter your email to login or create account</p>
             <input type="email" id="loginEmail" placeholder="Your Email Address *" style="width:100%; margin-bottom:15px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
@@ -78,10 +78,27 @@
         </div>
     </div>
 
+    <!-- DELIVERY POPUP -->
+    <div id="deliveryPopup" class="popup">
+        <div class="popup-content" style="max-width: 500px;">
+            <span id="closeDeliveryPopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
+            <h2>📦 Delivery Details</h2>
+            <p style="color: #00d4ff; font-size: 14px; margin-bottom: 15px;">Please fill in your shipping information</p>
+            <input type="text" id="deliveryName" placeholder="Full Name *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="email" id="deliveryEmail" placeholder="Email Address *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="text" id="deliveryCity" placeholder="City *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="text" id="deliveryPincode" placeholder="Pincode * (6 digits)" maxlength="6" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <textarea id="deliveryAddress" placeholder="Complete Address *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; min-height:80px;"></textarea>
+            <input type="text" id="deliveryState" placeholder="State *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <input type="tel" id="deliveryPhone" placeholder="Phone Number * (10 digits)" maxlength="10" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
+            <button onclick="submitDeliveryDetails()" style="width:100%; padding:12px; background:#00d4ff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Proceed to Payment</button>
+        </div>
+    </div>
+
     <!-- PAYMENT POPUP -->
     <div id="paymentPopup" class="popup">
         <div class="popup-content">
-            <span id="closePopup">&times;</span>
+            <span id="closePopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>Complete Payment</h2>
             <img src="images/QR.jpg" alt="QR Code" class="qr">
             <p>Scan QR code & pay the exact amount shown above</p>
@@ -99,7 +116,8 @@
     <script src="script.js"></script>
     <script>
         function closeLoginPopup() {
-            document.getElementById("loginPopup").style.display = "none";
+            const popup = document.getElementById("loginPopup");
+            if(popup) popup.style.display = "none";
         }
     </script>
 </body>
