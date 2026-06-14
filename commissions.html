@@ -90,35 +90,4 @@
             <input type="text" id="deliveryPincode" placeholder="Pincode * (6 digits)" maxlength="6" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
             <textarea id="deliveryAddress" placeholder="Complete Address *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; min-height:80px;"></textarea>
             <input type="text" id="deliveryState" placeholder="State *" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
-            <input type="tel" id="deliveryPhone" placeholder="Phone Number * (10 digits)" maxlength="10" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222; color:white; border:none;">
-            <button onclick="submitDeliveryDetails()" style="width:100%; padding:12px; background:#00d4ff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Proceed to Payment</button>
-        </div>
-    </div>
-
-    <!-- PAYMENT POPUP -->
-    <div id="paymentPopup" class="popup">
-        <div class="popup-content">
-            <span id="closePopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
-            <h2>Complete Payment</h2>
-            <img src="images/QR.jpg" alt="QR Code" class="qr">
-            <p>Scan QR code & pay the exact amount shown above</p>
-            <input type="file" id="paymentScreenshot" accept="image/*" required>
-            <button id="submitPayment">Submit Payment Proof</button>
-        </div>
-    </div>
-
-    <footer>
-        <h3>Kanishk Art Store</h3>
-        <p>Handmade Art • Custom Artwork • Keychains</p>
-        <p>Instagram : @kanishkv_456</p>
-    </footer>
-
-    <script src="script.js"></script>
-    <script>
-        function closeLoginPopup() {
-            const popup = document.getElementById("loginPopup");
-            if(popup) popup.style.display = "none";
-        }
-    </script>
-</body>
-</html>
+            <input type="tel" id="deliveryPhone" placeholder="Phone Number * (10 digits)" maxlength="10" style="width:100%; margin-bottom:12px; padding:12px; border-radius:8px; background:#222;
