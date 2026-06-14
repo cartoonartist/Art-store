@@ -398,13 +398,55 @@ if(sheetSize && medium && commissionPrice) {
     calculateCommission();
 }
 
-// Convert image to Base64
-function imageToBase64(file) {
+// ===========================
+// COMPRESS IMAGE TO UNDER 50KB
+// ===========================
+function compressImage(file, maxSizeKB = 45) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                let width = img.width;
+                let height = img.height;
+                let quality = 0.7;
+                
+                const canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                
+                // Reduce dimensions if image is too large
+                const maxDimension = 800;
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = (height * maxDimension) / width;
+                        width = maxDimension;
+                    } else {
+                        width = (width * maxDimension) / height;
+                        height = maxDimension;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                let base64 = canvas.toDataURL('image/jpeg', quality);
+                let sizeKB = Math.ceil((base64.length * 3) / 4 / 1024);
+                
+                // Reduce quality until size is under maxSizeKB
+                while (sizeKB > maxSizeKB && quality > 0.1) {
+                    quality -= 0.1;
+                    base64 = canvas.toDataURL('image/jpeg', quality);
+                    sizeKB = Math.ceil((base64.length * 3) / 4 / 1024);
+                }
+                
+                resolve(base64);
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
     });
 }
 
@@ -430,11 +472,12 @@ async function commissionOrder() {
     if(phone.length < 10) { alert("❌ Please enter a valid 10-digit phone number."); return; }
     if(!referenceImage) { alert("❌ REFERENCE IMAGE IS MANDATORY! Please upload a reference image."); return; }
     
+    // Compress reference image
     let imageBase64 = "";
     try {
-        imageBase64 = await imageToBase64(referenceImage);
+        imageBase64 = await compressImage(referenceImage, 45);
     } catch(error) {
-        alert("Error processing image. Please try again.");
+        alert("Error processing image. Please try again with a smaller image.");
         return;
     }
     
@@ -469,7 +512,7 @@ async function commissionOrder() {
 }
 
 // ===========================
-// SUBMIT PAYMENT - USING YOUR WORKING SERVICE ID
+// SUBMIT PAYMENT - WITH IMAGE COMPRESSION
 // ===========================
 const submitPaymentBtn = document.getElementById("submitPayment");
 if(submitPaymentBtn) {
@@ -481,12 +524,12 @@ if(submitPaymentBtn) {
             return;
         }
         
-        // Convert payment screenshot to Base64
+        // Compress payment screenshot to under 50KB
         let paymentScreenshotBase64 = "";
         try {
-            paymentScreenshotBase64 = await imageToBase64(screenshot.files[0]);
+            paymentScreenshotBase64 = await compressImage(screenshot.files[0], 45);
         } catch(error) {
-            alert("Error processing payment screenshot. Please try again.");
+            alert("Error processing payment screenshot. Please try again with a smaller image.");
             return;
         }
         
@@ -494,7 +537,6 @@ if(submitPaymentBtn) {
         let templateToUse = "";
         
         if(currentOrderType === "commission") {
-            // ========== COMMISSION ORDER - Use template_z2sderp ==========
             templateToUse = "template_z2sderp";
             
             emailMessage = `═══════════════════════════════════════
@@ -527,7 +569,6 @@ Monthly Offer: ${window.commissionDetails?.isMonthlyOffer ? "YES (10%)" : "NO"}
             markCommissionBuyer(window.commissionDetails?.email);
             
         } else {
-            // ========== PRODUCT ORDER - Use template_9q28bu6 ==========
             templateToUse = "template_9q28bu6";
             
             const discount = getTotalDiscount(currentOrderType);
@@ -567,7 +608,7 @@ Monthly Offer: ${isMonthlyOfferDay() ? "YES (10%)" : "NO"}
             }
         }
         
-        // Prepare email data
+        // Prepare email data with compressed images
         const emailData = {
             product_name: currentOrderName,
             product_id: currentOrderId,
@@ -585,25 +626,30 @@ Monthly Offer: ${isMonthlyOfferDay() ? "YES (10%)" : "NO"}
             emailData.reference_image = currentReferenceImage;
         }
         
-        // YOUR ORIGINAL WORKING SERVICE ID - DO NOT CHANGE THIS
-        const SERVICE_ID = "service_t2hgt6w";
+        // Check sizes before sending
+        const paymentSize = Math.ceil((paymentScreenshotBase64.length * 3) / 4 / 1024);
+        console.log(`Payment screenshot size: ${paymentSize}KB`);
+        
+        if(paymentSize > 50) {
+            alert(`⚠️ Image still too large (${paymentSize}KB). Please upload a smaller image (under 1MB).`);
+            return;
+        }
         
         try {
-            const result = await emailjs.send(
-                SERVICE_ID,
+            await emailjs.send(
+                "service_t2hgt6w",
                 templateToUse,
                 emailData
             );
-            console.log("Email sent successfully:", result);
             
             if(currentOrderType === "commission") {
                 alert("✅ COMMISSION ORDER SUBMITTED SUCCESSFULLY!\n\n📧 Check your email - Reference Image + Payment Screenshot attached!");
             } else {
-                alert("✅ PRODUCT ORDER SUBMITTED SUCCESSFULLY!\n\n📦 We'll ship your order within 3-5 business days.\n📧 Check your email - Payment Screenshot attached!");
+                alert("✅ PRODUCT ORDER SUBMITTED SUCCESSFULLY!\n\n📧 Check your email - Payment Screenshot attached!");
             }
         } catch(emailError) {
-            console.error("EmailJS Error Details:", emailError);
-            alert(`⚠️ ORDER RECEIVED! Email notification failed.\n\nOrder ID: ${currentOrderId}\n\nPlease DM on Instagram @kanishkv_456 with:\n1. Order ID: ${currentOrderId}\n2. Payment Screenshot\n${currentOrderType === 'commission' ? '3. Reference Image' : ''}\n\nWe will process your order manually.`);
+            console.error("EmailJS Error:", emailError);
+            alert(`❌ Email failed: ${emailError.text || emailError.message}\n\nPlease try uploading a smaller image (under 1MB).`);
         }
         
         document.getElementById("paymentPopup").style.display = "none";
