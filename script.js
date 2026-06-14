@@ -658,7 +658,8 @@ async function commissionOrder() {
 // ===========================
 // SUBMIT PAYMENT - USING FORMSUBMIT WITH YOUR SECRET KEY
 // ===========================
-const FORMSUBMIT_SECRET = "3d23393bedc5591116e49923dfe0bc16";
+const FORMSUBMIT_SECRET = "cartoonartist10m@gmail.com";
+
 
 const submitPaymentBtn = document.getElementById("submitPayment");
 if(submitPaymentBtn) {
