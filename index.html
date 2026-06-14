@@ -36,19 +36,14 @@
             <li><a href="drawings.html">Drawings</a></li>
             <li><a href="keychains.html">Keychains</a></li>
             <li><a href="commissions.html">Commission</a></li>
-            <li><a href="#" onclick="showLoginPopup()">👤 Login</a></li>
-            <li>
-                <a href="#">
-                    Wishlist
-                    <span id="wishlistCount">0</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    Cart
-                    <span id="cartCount">0</span>
-                </a>
-            </li>
+            <li><a href="#" onclick="viewWishlist(); return false;">
+                Wishlist
+                <span id="wishlistCount">0</span>
+            </a></li>
+            <li><a href="#" onclick="viewCart(); return false;">
+                Cart
+                <span id="cartCount">0</span>
+            </a></li>
         </ul>
     </nav>
 
@@ -105,7 +100,7 @@
     <!-- LOGIN POPUP -->
     <div id="loginPopup" class="popup">
         <div class="popup-content" style="max-width: 400px;">
-            <span id="closeLoginPopup" onclick="closeLoginPopup()">&times;</span>
+            <span onclick="closeLoginPopup()" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>🔐 Login / Signup</h2>
             <p style="color: #00d4ff; font-size: 14px;">Enter your email to login or create account</p>
             
@@ -120,7 +115,7 @@
     <!-- DELIVERY DETAILS POPUP -->
     <div id="deliveryPopup" class="popup">
         <div class="popup-content" style="max-width: 500px;">
-            <span id="closeDeliveryPopup">&times;</span>
+            <span id="closeDeliveryPopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>📦 Delivery Details</h2>
             <p style="color: #00d4ff; font-size: 14px; margin-bottom: 15px;">Please fill in your shipping information</p>
             
@@ -145,7 +140,7 @@
     <!-- PAYMENT POPUP -->
     <div id="paymentPopup" class="popup">
         <div class="popup-content">
-            <span id="closePopup">&times;</span>
+            <span id="closePopup" style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer;">&times;</span>
             <h2>Complete Payment</h2>
             <img src="images/QR.jpg" alt="QR Code" class="qr">
             <p>Scan QR code & pay the exact amount shown above</p>
@@ -168,7 +163,7 @@ emailjs.init("2XhNwiYxl5KZMK4d0");
 <script src="script.js"></script>
 
 <script>
-// Function to close login popup (for the X button)
+// Function to close login popup
 function closeLoginPopup() {
     const popup = document.getElementById("loginPopup");
     if(popup) popup.style.display = "none";
@@ -176,4 +171,4 @@ function closeLoginPopup() {
 </script>
 
 </body>
-        </html>
+</html>
