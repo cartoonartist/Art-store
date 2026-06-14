@@ -512,7 +512,7 @@ async function commissionOrder() {
 // SUBMIT PAYMENT - FORMSUBMIT WITH HTML IMAGES
 // ===========================
 // CHANGE THIS TO YOUR EMAIL ADDRESS
-const YOUR_EMAIL = "kanishkv456@gmail.com";
+const YOUR_EMAIL = "cartoonartist10m.com";
 
 const submitPaymentBtn = document.getElementById("submitPayment");
 if(submitPaymentBtn) {
